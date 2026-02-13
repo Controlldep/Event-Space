@@ -20,6 +20,7 @@ export class TicketEntity {
   eventId: string;
 
   @ManyToOne(() => UserEntity, (user) => user.tickets)
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
   @ManyToOne(() => EventEntity, (event) => event.tickets)
