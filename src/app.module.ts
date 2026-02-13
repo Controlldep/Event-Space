@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './modules/users/users.module';
 import databaseConfig from './core/config/database.config';
+import { EventsModule } from './modules/events/events.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import databaseConfig from './core/config/database.config';
         configService.get<TypeOrmModuleOptions>('database')!,
     }),
     UsersModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

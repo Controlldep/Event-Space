@@ -4,13 +4,12 @@ import { UsersService } from './application/users.service';
 import { UserRepository } from './infrastructure/user.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './domain/user.entity';
-import { TicketEntity } from '../tickets/domain/ticket.entity';
-import { EventEntity } from '../events/domain/event.entity';
+import { PasswordService } from './application/password.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, TicketEntity, EventEntity])],
+  imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [UsersController],
-  providers: [UsersService, UserRepository],
+  providers: [UsersService, UserRepository, PasswordService],
   exports: [],
 })
 export class UsersModule {}
