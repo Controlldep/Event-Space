@@ -11,7 +11,7 @@ export class UserInputDto {
 
   @MinLength(8, { message: 'password must be at least 8 characters long' })
   @MaxLength(20, { message: 'password cannot be longer than 20 characters' })
-  passwordHash: string;
+  password: string;
 
   @IsEnum(UserRole, { message: 'Role must be either user, admin or organizer' })
   role: UserRole;

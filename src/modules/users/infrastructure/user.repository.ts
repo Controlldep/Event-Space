@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../domain/user.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserInputDto } from '../api/input-dto/user.input.dto';
 import { UpdateUserInputDto } from '../api/input-dto/update-user.input.dto';
+import {
+  CustomHttpException,
+  DomainExceptionCode,
+} from '../../../core/exceptions/domain.exceptions';
 
 @Injectable()
 export class UserRepository {
@@ -17,10 +20,15 @@ export class UserRepository {
   }
 
   async getUsersById(id: string): Promise<UserEntity | null> {
-    return await this.userRepository.findOne({ where: { id: id } });
+    const findUserInDb: UserEntity | null = await this.userRepository.findOne({
+      where: { id: id },
+    });
+    if (!findUserInDb)
+      throw new CustomHttpException(DomainExceptionCode.NOT_FOUND);
+    return findUserInDb;
   }
 
-  async createUser(dto: UserInputDto): Promise<UserEntity> {
+  async saveUser(dto: UserEntity): Promise<UserEntity> {
     const user: UserEntity = this.userRepository.create(dto);
     const saveUser: UserEntity = await this.userRepository.save(user);
     return saveUser;
@@ -31,6 +39,9 @@ export class UserRepository {
   }
 
   async deleteUser(id: string): Promise<DeleteResult> {
-    return await this.userRepository.delete(id);
+    const result: DeleteResult = await this.userRepository.delete(id);
+    if (result.affected === 0)
+      throw new CustomHttpException(DomainExceptionCode.NOT_FOUND);
+    return result;
   }
 }
