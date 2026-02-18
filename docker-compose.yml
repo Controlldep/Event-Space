@@ -41,9 +41,9 @@ services:
     container_name: event_db_container
     restart: always
     environment:
-      POSTGRES_USER: vova_admin
-      POSTGRES_PASSWORD: supertopsecret123
-      POSTGRES_DB: event_space_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: e${DB_NAME}
     ports:
       - '5432:5432'
     volumes:
