@@ -1,13 +1,7 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../../users/domain/user.entity';
 import { TicketEntity } from '../../tickets/domain/ticket.entity';
+import { CreateEventDto } from '../api/input-dto/create-event.dto';
 
 @Entity('events')
 export class EventEntity {
@@ -38,4 +32,15 @@ export class EventEntity {
 
   @OneToMany(() => TicketEntity, (ticket) => ticket.event)
   tickets: TicketEntity[];
+
+  static createInstance(dto: CreateEventDto): EventEntity {
+    const event: EventEntity = new this();
+    event.title = dto.title;
+    event.description = dto.description;
+    event.maxParticipants = dto.maxParticipants;
+    event.date = dto.date;
+    event.location = dto.location;
+
+    return event;
+  }
 }

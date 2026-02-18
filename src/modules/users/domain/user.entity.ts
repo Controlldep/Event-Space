@@ -3,8 +3,9 @@ import { UserRole } from './type/user-role.type';
 import { EventEntity } from '../../events/domain/event.entity';
 import { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { UserInputDto } from '../api/input-dto/user.input.dto';
+import { SessionEntity } from './session.entity';
 
-@Entity('users')
+@Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -27,6 +28,9 @@ export class UserEntity {
 
   @OneToMany(() => EventEntity, (event) => event.user)
   events: EventEntity[];
+
+  @OneToMany(() => SessionEntity, (sessions) => sessions.user)
+  sessions: SessionEntity[];
 
   @OneToMany(() => TicketEntity, (ticket) => ticket.user)
   tickets: TicketEntity[];
