@@ -9,10 +9,14 @@ import {
 } from '@nestjs/common';
 import { CreateEventDto } from './input-dto/create-event.dto';
 import { EventsService } from '../application/events.service';
+import { TicketsService } from '../../tickets/application/tickets.service';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly ticketsService: TicketsService,
+  ) {}
 
   @Get()
   async getAllEvents() {
@@ -27,6 +31,11 @@ export class EventsController {
   @Post(':id')
   async createEvent(@Param('id') id: string, @Body() dto: CreateEventDto) {
     return await this.eventsService.createEvent(id, dto);
+  }
+
+  @Post(':eventId')
+  async createTicket(@Param('eventId') eventId: string) {
+    return await this.ticketsService.createTicket(eventId);
   }
 
   @Patch(':id')

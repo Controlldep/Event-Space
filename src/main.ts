@@ -44,7 +44,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('tickets example')
     .setDescription('Create Event-Space')
-    .setVersion('1.0')
+    .setVersion('0.3')
     .addTag('tickets')
     .build();
   const options: SwaggerDocumentOptions = {

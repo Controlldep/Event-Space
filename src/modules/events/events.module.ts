@@ -4,9 +4,10 @@ import { EventEntity } from './domain/event.entity';
 import { EventsController } from './api/events.controller';
 import { EventsService } from './application/events.service';
 import { EventsRepository } from './infrastructure/events.repository';
+import { TicketsModule } from '../tickets/tickets.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EventEntity])],
+  imports: [TypeOrmModule.forFeature([EventEntity]), TicketsModule],
   controllers: [EventsController],
   providers: [EventsService, EventsRepository],
   exports: [],
