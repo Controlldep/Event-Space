@@ -5,10 +5,7 @@ import { UserInputDto } from '../api/input-dto/user.input.dto';
 import { UpdateUserInputDto } from '../api/input-dto/update-user.input.dto';
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { PasswordService } from './password.service';
-import {
-  CustomHttpException,
-  DomainExceptionCode,
-} from '../../../core/exceptions/domain.exceptions';
+import { CustomHttpException, DomainExceptionCode } from '../../../core/exceptions/domain.exceptions';
 
 @Injectable()
 export class UsersService {
@@ -26,9 +23,7 @@ export class UsersService {
   }
 
   async createUser(dto: UserInputDto): Promise<UserEntity> {
-    const hashPassword: string = await this.passwordService.hashPassword(
-      dto.password,
-    );
+    const hashPassword: string = await this.passwordService.hashPassword(dto.password);
 
     const user: UserEntity = UserEntity.createInstance({
       ...dto,
@@ -39,8 +34,7 @@ export class UsersService {
   }
 
   async updateUser(id: string, dto: UpdateUserInputDto): Promise<UpdateResult> {
-    const userInDb: UserEntity | null =
-      await this.userRepository.getUsersById(id);
+    const userInDb: UserEntity | null = await this.userRepository.getUsersById(id);
     if (!userInDb) throw new CustomHttpException(DomainExceptionCode.NOT_FOUND);
 
     if (dto.password || dto.oldPassword) {
@@ -52,16 +46,10 @@ export class UsersService {
         throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST);
       }
 
-      const isMatch: boolean = await this.passwordService.comparePassword(
-        dto.oldPassword,
-        userInDb.passwordHash,
-      );
-      if (!isMatch)
-        throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST);
+      const isMatch: boolean = await this.passwordService.comparePassword(dto.oldPassword, userInDb.passwordHash);
+      if (!isMatch) throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST);
 
-      (dto as any).passwordHash = await this.passwordService.hashPassword(
-        dto.password,
-      );
+      (dto as any).passwordHash = await this.passwordService.hashPassword(dto.password);
 
       delete dto.password;
       delete dto.oldPassword;
