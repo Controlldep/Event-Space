@@ -8,7 +8,6 @@ import { PassportModule } from '@nestjs/passport';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { SessionEntity } from './domain/session.entity';
 import { AuthController } from './api/auth.controller';
-import { AuthService } from './application/auth.service';
 import { SessionService } from './application/session.service';
 import { JwtService } from './application/jwt.service';
 import { SessionRepository } from './infrastructure/session.repository';
@@ -21,8 +20,11 @@ import { UpdateUserUseCase } from './application/use-cases/account/commands/upda
 import { DeleteUserUseCase } from './application/use-cases/account/commands/delete-user-use-case';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UsersQueryRepository } from './infrastructure/users-query.repository';
-import { GetAllUsersQuery, GetAllUsersUseCase } from './application/use-cases/account/queries/get-all-users-use-case';
-import { GetUsersByIdQuery, GetUsersByIdUseCase } from './application/use-cases/account/queries/get-users-by-id-use-case';
+import { GetAllUsersUseCase } from './application/use-cases/account/queries/get-all-users-use-case';
+import { GetUsersByIdUseCase } from './application/use-cases/account/queries/get-users-by-id-use-case';
+import { LoginUserUseCase } from './application/use-cases/auth/login-user-use-case';
+import { RegistrationUserUseCase } from './application/use-cases/auth/registration-user-use-case';
+import { RefreshSessionUseCase } from './application/use-cases/auth/refresh-session';
 
 @Module({
   imports: [
@@ -45,7 +47,6 @@ import { GetUsersByIdQuery, GetUsersByIdUseCase } from './application/use-cases/
     DeleteUserUseCase,
     UserRepository,
     PasswordService,
-    AuthService,
     SessionService,
     JwtService,
     SessionRepository,
@@ -57,6 +58,9 @@ import { GetUsersByIdQuery, GetUsersByIdUseCase } from './application/use-cases/
     UsersQueryRepository,
     GetAllUsersUseCase,
     GetUsersByIdUseCase,
+    LoginUserUseCase,
+    RegistrationUserUseCase,
+    RefreshSessionUseCase,
   ],
   exports: [],
 })

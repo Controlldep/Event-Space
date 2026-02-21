@@ -1,5 +1,4 @@
 import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthService } from '../application/auth.service';
 import { SessionService } from '../application/session.service';
 import { Throttle } from '@nestjs/throttler';
 import { CustomThrottlerGuard } from '../guards/trottler.guard';
@@ -9,12 +8,16 @@ import type { Request, Response } from 'express';
 import { RefreshAuthGuard } from '../guards/refresh-auth.guard';
 import { CurrentUser } from '../../../core/decorators/extract-user-from-request';
 import type { ActiveUserData } from '../../../core/decorators/extract-user-from-request';
+import { CommandBus } from '@nestjs/cqrs';
+import { LoginUserCommand } from '../application/use-cases/auth/login-user-use-case';
+import { RegistrationUserCommand } from '../application/use-cases/auth/registration-user-use-case';
+import { RefreshSessionCommand } from '../application/use-cases/auth/refresh-session';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
     private readonly sessionService: SessionService,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @UseGuards(CustomThrottlerGuard)
@@ -22,7 +25,7 @@ export class AuthController {
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: AuthUserInputDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken } = await this.authService.login(dto, req);
+    const { accessToken, refreshToken } = await this.commandBus.execute(new LoginUserCommand(dto, req));
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -38,7 +41,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 10_000 } })
   @Post('registration')
   async registration(@Body() dto: AuthRegistrationUserInputDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await this.authService.registerUser(dto);
+    await this.commandBus.execute(new RegistrationUserCommand(dto));
     return this.login(dto, req, res);
   }
 
@@ -54,7 +57,7 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   @Post('refresh-token')
   async refreshTokenHandler(@CurrentUser() user: ActiveUserData, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken } = await this.authService.refreshSession(user.userId, user.deviceId!);
+    const { accessToken, refreshToken } = await this.commandBus.execute(new RefreshSessionCommand(user.userId, user.deviceId!));
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
