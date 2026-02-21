@@ -1,18 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  DocumentBuilder,
-  SwaggerDocumentOptions,
-  SwaggerModule,
-} from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
-import {
-  CustomHttpException,
-  DomainExceptionCode,
-} from './core/exceptions/domain.exceptions';
+import { CustomHttpException, DomainExceptionCode } from './core/exceptions/domain.exceptions';
 import cookieParser from 'cookie-parser';
 import { CustomExceptionFilter } from './core/exceptions/exceptionts-filter';
+import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -29,17 +23,14 @@ async function bootstrap() {
           property: error.property,
           constraints: error.constraints,
         }));
-        throw new CustomHttpException(
-          DomainExceptionCode.BAD_REQUEST,
-          'Validation failed',
-          details,
-        );
+        throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST, 'Validation failed', details);
       },
     }),
   );
 
   app.use(cookieParser());
   app.useGlobalFilters(new CustomExceptionFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('tickets example')
@@ -51,8 +42,7 @@ async function bootstrap() {
     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
   };
 
-  const documentFactory = () =>
-    SwaggerModule.createDocument(app, config, options);
+  const documentFactory = () => SwaggerModule.createDocument(app, config, options);
   SwaggerModule.setup('api', app, documentFactory);
 
   await app.listen(process.env.PORT ?? 3000);

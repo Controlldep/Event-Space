@@ -16,10 +16,6 @@ export class UserRepository {
     return await this.userRepository.findOne({ where: { email: email } });
   }
 
-  async getAllUsers(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
-  }
-
   async getUsersById(id: string): Promise<UserEntity | null> {
     const findUserInDb: UserEntity | null = await this.userRepository.findOne({
       where: { id: id },
