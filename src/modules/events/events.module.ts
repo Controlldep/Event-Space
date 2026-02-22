@@ -5,9 +5,10 @@ import { EventsController } from './api/events.controller';
 import { EventsService } from './application/events.service';
 import { EventsRepository } from './infrastructure/events.repository';
 import { TicketsModule } from '../tickets/tickets.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EventEntity]), TicketsModule],
+  imports: [CqrsModule, TypeOrmModule.forFeature([EventEntity]), TicketsModule],
   controllers: [EventsController],
   providers: [EventsService, EventsRepository],
   exports: [],

@@ -17,8 +17,11 @@ export class EventEntity {
   @Column()
   maxParticipants: number;
 
-  @Column()
-  date: string;
+  @Column({ type: 'timestamp' })
+  startTime: Date;
+
+  @Column({ type: 'timestamp' })
+  endTime: Date;
 
   @Column()
   location: string;
@@ -33,12 +36,14 @@ export class EventEntity {
   @OneToMany(() => TicketEntity, (ticket) => ticket.event)
   tickets: TicketEntity[];
 
-  static createInstance(dto: CreateEventDto): EventEntity {
+  static createInstance(dto: CreateEventDto, organizerId: string): EventEntity {
     const event: EventEntity = new this();
     event.title = dto.title;
     event.description = dto.description;
     event.maxParticipants = dto.maxParticipants;
-    event.date = dto.date;
+    event.organizerId = organizerId;
+    event.startTime = dto.startTime;
+    event.endTime = dto.endTime;
     event.location = dto.location;
 
     return event;

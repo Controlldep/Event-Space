@@ -1,22 +1,12 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CreateEventDto } from './input-dto/create-event.dto';
 import { EventsService } from '../application/events.service';
-import { TicketsService } from '../../tickets/application/tickets.service';
+import { type ActiveUserData, CurrentUser } from '../../../core/decorators/extract-user-from-request';
+import { JwtAuthGuard } from '../../users/guards/jwt-auth.guard';
 
 @Controller('events')
 export class EventsController {
-  constructor(
-    private readonly eventsService: EventsService,
-    private readonly ticketsService: TicketsService,
-  ) {}
+  constructor(private readonly eventsService: EventsService) {}
 
   @Get()
   async getAllEvents() {
@@ -28,21 +18,19 @@ export class EventsController {
     return await this.eventsService.getEventById(id);
   }
 
-  @Post(':id')
-  async createEvent(@Param('id') id: string, @Body() dto: CreateEventDto) {
-    return await this.eventsService.createEvent(id, dto);
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async createEvent(@CurrentUser() user: ActiveUserData, @Body() dto: CreateEventDto) {
+    return await this.eventsService.createEvent(user, dto);
   }
 
-  @Post(':eventId')
-  async createTicket(@Param('eventId') eventId: string) {
-    return await this.ticketsService.createTicket(eventId);
-  }
-
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async patchEvent(@Param('id') id: string, @Body() dto: CreateEventDto) {
-    return await this.eventsService.patchEvent(id, dto);
+  async patchEvent(@CurrentUser() user: ActiveUserData, @Param('id') id: string, @Body() dto: CreateEventDto) {
+    return await this.eventsService.updateEvent(id, dto, user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteEvent(@Param('id') id: string) {
     return await this.eventsService.deleteEvent(id);

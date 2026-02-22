@@ -1,32 +1,35 @@
-import { IsDate, IsInt, IsNotEmpty, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsDate, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateEventDto {
+export class UpdateEventDto {
+  @IsOptional()
   @MinLength(1, { message: 'Заголовок слишком короткий' })
   @MaxLength(20, { message: 'Заголовок слишком длинный' })
-  title: string;
+  title?: string;
 
+  @IsOptional()
   @MinLength(10, { message: 'Описание должно быть подробнее' })
   @MaxLength(50, { message: 'Описание слишком длинное' })
-  description: string;
+  description?: string;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000)
-  maxParticipants: number;
+  maxParticipants?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
-  startTime: Date;
+  startTime?: Date;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
-  endTime: Date;
+  endTime?: Date;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(100)
-  location: string;
+  location?: string;
 }
