@@ -10,10 +10,6 @@ export class TicketsRepository {
     private readonly ticketsRepository: Repository<TicketEntity>,
   ) {}
 
-  async getAllTickets() {
-    return await this.ticketsRepository.find();
-  }
-
   async getMyTickets(id: string) {
     return await this.ticketsRepository.findOneBy({ id });
   }
