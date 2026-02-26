@@ -23,8 +23,9 @@ import { UsersQueryRepository } from './infrastructure/users-query.repository';
 import { GetAllUsersUseCase } from './application/use-cases/account/queries/get-all-users-use-case';
 import { GetUsersByIdUseCase } from './application/use-cases/account/queries/get-users-by-id-use-case';
 import { LoginUserUseCase } from './application/use-cases/auth/login-user-use-case';
-import { RegistrationUserUseCase } from './application/use-cases/auth/registration-user-use-case';
+import { RegisterUserUseCase } from './application/use-cases/auth/register-user-use-case';
 import { RefreshSessionUseCase } from './application/use-cases/auth/refresh-session';
+import { IdentificationGuard } from './guards/Identification.guard';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { RefreshSessionUseCase } from './application/use-cases/auth/refresh-sess
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    IdentificationGuard,
     UserRepository,
     PasswordService,
     SessionService,
@@ -59,7 +61,7 @@ import { RefreshSessionUseCase } from './application/use-cases/auth/refresh-sess
     GetAllUsersUseCase,
     GetUsersByIdUseCase,
     LoginUserUseCase,
-    RegistrationUserUseCase,
+    RegisterUserUseCase,
     RefreshSessionUseCase,
   ],
   exports: [],

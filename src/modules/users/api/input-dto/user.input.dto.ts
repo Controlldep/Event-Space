@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, MaxLength, MinLength } from 'class-validator';
-import { UserRole } from '../../domain/type/user-role.type';
+import { UserRole } from '../../domain/enum/user-role.type';
 
 export class UserInputDto {
   @MinLength(8, { message: 'fullName must be at least 8 characters long' })

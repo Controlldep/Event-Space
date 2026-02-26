@@ -16,16 +16,19 @@ export class UserRepository {
     return await this.userRepository.findOne({ where: { email: email } });
   }
 
-  async getUsersById(id: string): Promise<UserEntity | null> {
-    const findUserInDb: UserEntity | null = await this.userRepository.findOne({
-      where: { id: id },
+  async existsByEmail(email: string): Promise<boolean> {
+    return await this.userRepository.exists({
+      where: { email: email.toLowerCase() },
     });
-
-    return findUserInDb;
   }
 
-  async saveUser(dto: UserEntity): Promise<UserEntity> {
-    const user: UserEntity = this.userRepository.create(dto);
+  async getUsersById(id: string): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({
+      where: { id: id },
+    });
+  }
+
+  async saveUser(user: UserEntity): Promise<UserEntity> {
     await this.userRepository.save(user);
     return user;
   }

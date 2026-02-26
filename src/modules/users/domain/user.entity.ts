@@ -1,11 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { UserRole } from './type/user-role.type';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { UserRole } from './enum/user-role.type';
 import { EventEntity } from '../../events/domain/event.entity';
 import { TicketEntity } from '../../tickets/domain/ticket.entity';
-import { UserInputDto } from '../api/input-dto/user.input.dto';
 import { SessionEntity } from './session.entity';
+import { CreateUserDomainModel } from './input-dto/user-domain.model';
 
-@Entity('user')
+@Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -26,19 +26,25 @@ export class UserEntity {
   })
   role: UserRole;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   @OneToMany(() => EventEntity, (event) => event.user)
   events: EventEntity[];
 
-  @OneToMany(() => SessionEntity, (sessions) => sessions.user)
+  @OneToMany(() => SessionEntity, (session) => session.user)
   sessions: SessionEntity[];
 
   @OneToMany(() => TicketEntity, (ticket) => ticket.user)
   tickets: TicketEntity[];
 
-  static createInstance(dto: UserInputDto): UserEntity {
+  static createInstance(dto: CreateUserDomainModel): UserEntity {
     const user: UserEntity = new this();
-    user.email = dto.email;
-    user.passwordHash = dto.password;
+    user.email = dto.email.toLowerCase();
+    user.passwordHash = dto.passwordHash;
     user.fullName = dto.fullName;
     user.role = dto.role;
 
