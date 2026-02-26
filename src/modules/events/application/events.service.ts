@@ -4,11 +4,12 @@ import { EventsRepository } from '../infrastructure/events.repository';
 import type { ActiveUserData } from '../../../core/decorators/extract-user-from-request';
 import { UserEntity } from '../../users/domain/user.entity';
 import { CustomHttpException, DomainExceptionCode } from '../../../core/exceptions/domain.exceptions';
-import { UserRole } from '../../users/domain/type/user-role.type';
+import { UserRole } from '../../users/domain/enum/user-role.type';
 import { EventEntity } from '../domain/event.entity';
 import { DataSource, LessThan, MoreThan, Not } from 'typeorm';
 import { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { UpdateEventDto } from '../api/input-dto/update-event.dto';
+import { QueryEventDto } from '../api/input-dto/query-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -17,8 +18,16 @@ export class EventsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getAllEvents() {
-    return await this.eventsRepository.getAllEvents();
+  async getAllEvents(dto: QueryEventDto) {
+    const [items, total] = await this.eventsRepository.getAllEvents(dto);
+
+    return {
+      items,
+      total,
+      pageNumber: dto.pageNumber,
+      pageSize: dto.pageSize,
+      totalPages: Math.ceil(total / dto.pageSize),
+    };
   }
 
   async getEventById(id: string) {

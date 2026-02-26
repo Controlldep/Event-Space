@@ -1,16 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CreateEventDto } from './input-dto/create-event.dto';
 import { EventsService } from '../application/events.service';
 import { type ActiveUserData, CurrentUser } from '../../../core/decorators/extract-user-from-request';
 import { JwtAuthGuard } from '../../users/guards/jwt-auth.guard';
+import { QueryEventDto } from './input-dto/query-event.dto';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  async getAllEvents() {
-    return await this.eventsService.getAllEvents();
+  async getAllEvents(@Query() dto: QueryEventDto) {
+    return await this.eventsService.getAllEvents(dto);
   }
 
   @Get(':id')

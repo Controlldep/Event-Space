@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { UserEntity } from '../../users/domain/user.entity';
 import { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { CreateEventDto } from '../api/input-dto/create-event.dto';
+import { EventCategory } from './enum/event-category';
 
 @Entity('events')
 export class EventEntity {
@@ -26,6 +27,12 @@ export class EventEntity {
   @Column()
   location: string;
 
+  @Column({
+    type: 'enum',
+    enum: EventCategory,
+  })
+  category: EventCategory;
+
   @Column('uuid')
   organizerId: string;
 
@@ -45,6 +52,7 @@ export class EventEntity {
     event.startTime = dto.startTime;
     event.endTime = dto.endTime;
     event.location = dto.location;
+    event.category = dto.category;
 
     return event;
   }

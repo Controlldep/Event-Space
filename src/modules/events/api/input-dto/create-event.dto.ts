@@ -1,5 +1,6 @@
-import { IsDate, IsInt, IsNotEmpty, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsDate, IsEnum, IsInt, IsNotEmpty, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
+import { EventCategory } from '../../domain/enum/event-category';
 
 export class CreateEventDto {
   @MinLength(1, { message: 'Заголовок слишком короткий' })
@@ -29,4 +30,7 @@ export class CreateEventDto {
   @IsNotEmpty()
   @MaxLength(100)
   location: string;
+
+  @IsEnum(EventCategory)
+  category: EventCategory;
 }
