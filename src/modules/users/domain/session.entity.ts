@@ -8,28 +8,28 @@ export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', unique: true })
+  @Column({ type: 'uuid' })
   deviceId: string;
 
   @Column({ type: 'uuid' })
   userId: string;
 
   @Column({ type: 'varchar' })
-  jtiHash: string;
-
-  @Column({ type: 'timestamp' })
-  expirationDate: Date;
+  refreshTokenHash: string;
 
   @Column({ type: 'varchar' })
   ip: string;
 
   @Column({ type: 'varchar' })
-  title: string;
+  userAgent: string;
 
   @Column({ type: 'timestamp' })
-  lastActiveDate: string;
+  lastActiveDate: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.sessions)
+  @Column({ type: 'timestamp' })
+  expirationDate: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.sessions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
@@ -38,8 +38,8 @@ export class SessionEntity {
     session.deviceId = dto.deviceId;
     session.userId = dto.userId;
     session.ip = dto.ip;
-    session.jtiHash = dto.jtiHash;
-    session.title = dto.title;
+    session.refreshTokenHash = dto.refreshTokenHash;
+    session.userAgent = dto.userAgent;
     session.lastActiveDate = dto.lastActiveDate;
     session.expirationDate = dto.expirationDate;
 

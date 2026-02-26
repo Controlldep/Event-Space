@@ -1,6 +1,4 @@
-export class SessionInputDto {
-  userId: string;
-  deviceId: string;
+export class UpdateSessionDto {
   ip: string;
   refreshTokenHash: string;
   userAgent: string;

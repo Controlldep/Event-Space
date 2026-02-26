@@ -1,20 +1,22 @@
 import { SessionInputDto } from '../../domain/input-dto/session.input.dto';
-import { getClientIp } from './get-client-ip';
-import { Request } from 'express';
+import ms, { StringValue } from 'ms';
 
-export function createSession(req: Request, deviceId: string, userId: string, jtiHash: string): SessionInputDto {
-  const ip: string = getClientIp(req);
-  const title: string = req.headers['user-agent'] ?? 'Unknown device';
-  const expirationDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-
+export function createSession(
+  userId: string,
+  deviceId: string,
+  ip: string,
+  userAgent: string,
+  refreshTokenHash: string,
+  maxAge: string,
+): SessionInputDto {
   const createSessionDto: SessionInputDto = {
     userId: userId,
     deviceId: deviceId,
     ip,
-    title,
-    jtiHash,
-    lastActiveDate: new Date().toISOString(),
-    expirationDate,
+    userAgent,
+    refreshTokenHash,
+    lastActiveDate: new Date(),
+    expirationDate: new Date(Date.now() + ms(maxAge as StringValue)),
   };
 
   return createSessionDto;
