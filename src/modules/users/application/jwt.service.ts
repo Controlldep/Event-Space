@@ -1,25 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
-import { PasswordService } from './password.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtService {
-  constructor(private readonly passwordService: PasswordService) {}
+  constructor(private configService: ConfigService) {}
 
-  createAccessToken(userId: string): string {
-    //TODO разобраться с zod
-    return jwt.sign({ userId }, process.env.JWT_SECRET!, {
+  createAccessToken(userId: string, deviceId: string): string {
+    return jwt.sign({ userId, deviceId }, this.configService.get('JWT_SECRET')!, {
       expiresIn: '10m',
     });
   }
 
-  async createRefreshToken(userId: string, deviceId: string) {
-    //TODO разобраться с zod
-    const jti: string = this.passwordService.generateRandomBytes();
-    const hashJti: string = await this.passwordService.hashPassword(jti);
-
-    const refreshToken: string = jwt.sign({ userId, jti, deviceId }, process.env.JWT_SECRET_REFRESH!, { expiresIn: '20m' });
-
-    return { refreshToken, hashJti };
+  //TODO придумать как сделать через энв
+  createRefreshToken(userId: string, deviceId: string) {
+    return jwt.sign({ userId, deviceId }, this.configService.get('JWT_SECRET_REFRESH')!, { expiresIn: '20m' });
   }
 }

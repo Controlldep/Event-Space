@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
 import { SessionService } from '../application/session.service';
 import { Throttle } from '@nestjs/throttler';
 import { CustomThrottlerGuard } from '../guards/trottler.guard';
@@ -10,62 +10,89 @@ import { CurrentUser } from '../../../core/decorators/extract-user-from-request'
 import type { ActiveUserData } from '../../../core/decorators/extract-user-from-request';
 import { CommandBus } from '@nestjs/cqrs';
 import { LoginUserCommand } from '../application/use-cases/auth/login-user-use-case';
-import { RegistrationUserCommand } from '../application/use-cases/auth/registration-user-use-case';
+import { RegisterUserCommand } from '../application/use-cases/auth/register-user-use-case';
 import { RefreshSessionCommand } from '../application/use-cases/auth/refresh-session';
+import { GetUserIp } from '../../../core/decorators/get-user-ip';
+import { GetUserAgent } from '../../../core/decorators/get-user-agent';
+import { IdentificationGuard } from '../guards/Identification.guard';
+import { GetUserDeviceId } from '../../../core/decorators/get-user-device-id';
+import ms, { StringValue } from 'ms';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly sessionService: SessionService,
     private readonly commandBus: CommandBus,
+    private readonly configService: ConfigService,
   ) {}
-
-  @UseGuards(CustomThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 10_000 } })
-  @HttpCode(200)
-  @Post('login')
-  async login(@Body() dto: AuthUserInputDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken } = await this.commandBus.execute(new LoginUserCommand(dto, req));
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) * 60 * 1000,
-    });
-
-    return { accessToken: accessToken };
-  }
 
   @HttpCode(200)
   @UseGuards(CustomThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 10_000 } })
   @Post('registration')
-  async registration(@Body() dto: AuthRegistrationUserInputDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await this.commandBus.execute(new RegistrationUserCommand(dto));
-    return this.login(dto, req, res);
+  async registration(
+    @Body() dto: AuthRegistrationUserInputDto,
+    @GetUserIp() ip: string,
+    @GetUserAgent() userAgent: string,
+    @GetUserDeviceId() deviceId: string | null,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.commandBus.execute(new RegisterUserCommand(dto));
+    return this.login(dto, ip, userAgent, deviceId, res);
   }
 
-  @HttpCode(204)
-  @UseGuards(RefreshAuthGuard)
-  @Post('logout')
-  async logOutHandler(@CurrentUser() user: ActiveUserData, @Res({ passthrough: true }) res: Response) {
-    await this.sessionService.deleteDeviceById(user.userId, user.deviceId!);
-    res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+  @UseGuards(CustomThrottlerGuard, IdentificationGuard)
+  @Throttle({ default: { limit: 5, ttl: 10_000 } })
+  @HttpCode(200)
+  @Post('login')
+  async login(
+    @Body() dto: AuthUserInputDto,
+    @GetUserIp() ip: string,
+    @GetUserAgent() userAgent: string,
+    @GetUserDeviceId() deviceId: string | null,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const {
+      accessToken,
+      refreshToken,
+      deviceId: newDeviceId,
+    } = await this.commandBus.execute(new LoginUserCommand(dto, ip, userAgent, deviceId));
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: ms(this.configService.get('MAX_AGE_REFRESH_TOKEN') as StringValue),
+    });
+    return { accessToken: accessToken, deviceId: newDeviceId };
   }
 
   @HttpCode(200)
   @UseGuards(RefreshAuthGuard)
   @Post('refresh-token')
   async refreshTokenHandler(@CurrentUser() user: ActiveUserData, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken } = await this.commandBus.execute(new RefreshSessionCommand(user.userId, user.deviceId!));
+    const {
+      accessToken,
+      refreshToken,
+      deviceId: newDeviceId,
+    } = await this.commandBus.execute(new RefreshSessionCommand(user.userId, user.deviceId));
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) * 60 * 1000,
+      sameSite: 'strict',
+      maxAge: ms(this.configService.get('MAX_AGE_REFRESH_TOKEN') as StringValue),
     });
 
-    return { accessToken };
+    return { accessToken: accessToken, deviceId: newDeviceId };
+  }
+
+  @HttpCode(204)
+  @UseGuards(RefreshAuthGuard)
+  @Post('logout')
+  async logOutHandler(@CurrentUser() user: ActiveUserData, @Res({ passthrough: true }) res: Response) {
+    await this.sessionService.deleteDeviceById(user.userId, user.deviceId);
+    res.clearCookie('refreshToken', { httpOnly: true, secure: true, sameSite: 'strict' });
   }
 
   @UseGuards(RefreshAuthGuard)

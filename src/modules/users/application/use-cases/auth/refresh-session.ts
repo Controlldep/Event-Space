@@ -1,7 +1,7 @@
 import { JwtService } from '../../jwt.service';
 import { SessionService } from '../../session.service';
-import jwt from 'jsonwebtoken';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { PasswordService } from '../../password.service';
 
 export class RefreshSessionCommand {
   constructor(
@@ -15,17 +15,18 @@ export class RefreshSessionUseCase implements ICommandHandler<RefreshSessionComm
   constructor(
     private readonly jwtService: JwtService,
     private readonly sessionService: SessionService,
+    private readonly passwordService: PasswordService,
   ) {}
 
   async execute(command: RefreshSessionCommand) {
     const { userId, deviceId } = command;
 
-    const accessToken: string = this.jwtService.createAccessToken(userId);
-    const { refreshToken, hashJti } = await this.jwtService.createRefreshToken(userId, deviceId);
+    const accessToken: string = this.jwtService.createAccessToken(userId, deviceId);
+    const refreshToken: string = this.jwtService.createRefreshToken(userId, deviceId);
+    const refreshTokenHash: string = this.passwordService.hashRefreshToken(refreshToken);
 
-    const decoded: { exp: number } = jwt.decode(refreshToken) as { exp: number };
-    await this.sessionService.updateSessionData(userId, deviceId, hashJti, decoded.exp);
+    await this.sessionService.updateRefreshForSession(userId, deviceId, refreshTokenHash);
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken, deviceId };
   }
 }

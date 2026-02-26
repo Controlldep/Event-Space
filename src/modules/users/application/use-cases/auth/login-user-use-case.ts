@@ -5,15 +5,21 @@ import { SessionService } from '../../session.service';
 import { UserEntity } from '../../../domain/user.entity';
 import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
 import { AuthUserInputDto } from '../../../api/input-dto/auth-user.input.dto';
-import { Request } from 'express';
 import { SessionInputDto } from '../../../domain/input-dto/session.input.dto';
 import { createSession } from '../../../api/helpers/create-session';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { createDeviceId } from '../../../api/helpers/create-device-id';
+import { SessionEntity } from '../../../domain/session.entity';
+import { UpdateUserSession } from '../../helpers/update-session';
+import { UpdateSessionDto } from '../../dto/input/update-session.dto';
+import { ConfigService } from '@nestjs/config';
 
 export class LoginUserCommand {
   constructor(
-    public readonly data: AuthUserInputDto,
-    public readonly req: Request,
+    public readonly dto: AuthUserInputDto,
+    public readonly ip: string,
+    public readonly userAgent: string,
+    public readonly deviceId: string | null,
   ) {}
 }
 
@@ -24,25 +30,39 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     private readonly passwordService: PasswordService,
     private readonly jwtService: JwtService,
     private readonly sessionService: SessionService,
+    private readonly configService: ConfigService,
   ) {}
 
   async execute(command: LoginUserCommand) {
-    const { data, req } = command;
+    const { dto, ip, userAgent } = command;
+    let { deviceId } = command;
 
-    const user: UserEntity | null = await this.usersRepository.findUserByEmail(data.email);
+    const user: UserEntity | null = await this.usersRepository.findUserByEmail(dto.email);
     if (!user) throw new CustomHttpException(DomainExceptionCode.UNAUTHORIZED);
 
-    const isPasswordValid: boolean = await this.passwordService.comparePassword(data.password, user.passwordHash);
+    const isPasswordValid: boolean = await this.passwordService.comparePassword(dto.password, user.passwordHash);
     if (!isPasswordValid) throw new CustomHttpException(DomainExceptionCode.UNAUTHORIZED);
 
-    const deviceId: string = await this.sessionService.getOrCreateDeviceId(req, user.id);
-    const { refreshToken, hashJti } = await this.jwtService.createRefreshToken(user.id, deviceId);
+    let existingSession: SessionEntity | null = null;
+    if (deviceId) {
+      existingSession = await this.sessionService.findSessionByDeviceIdAndUserId(user.id, deviceId);
+    }
+    console.log(existingSession);
+    if (!existingSession) deviceId = createDeviceId();
 
-    const createSessionForDb: SessionInputDto = createSession(req, deviceId, user.id, hashJti);
-    await this.sessionService.saveSession(createSessionForDb);
+    const refreshToken = this.jwtService.createRefreshToken(user.id, deviceId!);
+    const refreshTokenHash = this.passwordService.hashRefreshToken(refreshToken);
 
-    const accessToken = this.jwtService.createAccessToken(user.id);
+    if (!existingSession) {
+      const maxAge = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
+      const sessionDto = createSession(user.id, deviceId!, ip, userAgent, refreshTokenHash, maxAge);
+      await this.sessionService.saveSession(sessionDto);
+    } else {
+      const maxAge = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
+      const updateDto = UpdateUserSession(ip, userAgent, refreshTokenHash, maxAge);
+      await this.sessionService.updateSession(user.id, deviceId!, updateDto);
+    }
 
-    return { accessToken, refreshToken };
+    return { accessToken: this.jwtService.createAccessToken(user.id, deviceId!), refreshToken, deviceId };
   }
 }
