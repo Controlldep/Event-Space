@@ -21,7 +21,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
 
     const user: UserEntity = UserEntity.createInstance({
       ...dto,
-      password: hashPassword,
+      passwordHash: hashPassword,
     });
 
     return await this.userRepository.saveUser(user);
