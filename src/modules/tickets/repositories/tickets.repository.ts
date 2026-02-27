@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TicketEntity } from '../domain/ticket.entity';
+import { GetAllTicketsWithPaginationDto } from './dto/get-all-tickets-with-pagination.dto';
 
 @Injectable()
 export class TicketsRepository {
@@ -10,16 +11,16 @@ export class TicketsRepository {
     private readonly ticketsRepository: Repository<TicketEntity>,
   ) {}
 
-  async getMyTickets(id: string) {
-    return await this.ticketsRepository.findOneBy({ id });
-  }
+  async getMyTickets(dto: GetAllTicketsWithPaginationDto): Promise<[TicketEntity[], number]> {
+    const { userId, pageNumber, pageSize, sortDirection } = dto;
 
-  async createTicket(eventId: string) {
-    // const saveEvent: TicketEntity = await this.ticketsRepository.save(eventId);
-    // return saveEvent;
-  }
-
-  async deleteTicket(id: string) {
-    return await this.ticketsRepository.delete(id);
+    return await this.ticketsRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.event', 'event')
+      .where('ticket.userId = :userId', { userId })
+      .orderBy('ticket.createdAt', sortDirection)
+      .skip((pageNumber - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
   }
 }
