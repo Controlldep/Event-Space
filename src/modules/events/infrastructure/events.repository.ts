@@ -30,7 +30,7 @@ export class EventsRepository {
 
     queryBuilder
       .orderBy('event.startTime', sortDirection.toUpperCase() as 'ASC' | 'DESC')
-      .skip(filters.calculateSkip())
+      .skip((filters.pageNumber - 1) * pageSize)
       .take(pageSize);
 
     return queryBuilder.getManyAndCount();

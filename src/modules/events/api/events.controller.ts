@@ -4,10 +4,18 @@ import { EventsService } from '../application/events.service';
 import { type ActiveUserData, CurrentUser } from '../../../core/decorators/extract-user-from-request';
 import { JwtAuthGuard } from '../../users/guards/jwt-auth.guard';
 import { QueryEventDto } from './input-dto/query-event.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateEventCommand } from '../application/use-case/command/create-event-use-case';
+import { UpdateEventCommand } from '../application/use-case/command/update-event-use-case';
+import { EventEntity } from '../domain/event.entity';
+import { DeleteResult } from 'typeorm';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get()
   async getAllEvents(@Query() dto: QueryEventDto) {
@@ -15,25 +23,25 @@ export class EventsController {
   }
 
   @Get(':id')
-  async getEventById(@Param('id') id: string) {
+  async getEventById(@Param('id') id: string): Promise<EventEntity | null> {
     return await this.eventsService.getEventById(id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async createEvent(@CurrentUser() user: ActiveUserData, @Body() dto: CreateEventDto) {
-    return await this.eventsService.createEvent(user, dto);
+  async createEvent(@CurrentUser() user: ActiveUserData, @Body() dto: CreateEventDto): Promise<EventEntity> {
+    return await this.commandBus.execute(new CreateEventCommand(user, dto));
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async patchEvent(@CurrentUser() user: ActiveUserData, @Param('id') id: string, @Body() dto: CreateEventDto) {
-    return await this.eventsService.updateEvent(id, dto, user);
+  async patchEvent(@CurrentUser() user: ActiveUserData, @Param('id') id: string, @Body() dto: CreateEventDto): Promise<EventEntity> {
+    return await this.commandBus.execute(new UpdateEventCommand(id, dto, user));
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteEvent(@Param('id') id: string) {
+  async deleteEvent(@Param('id') id: string): Promise<DeleteResult> {
     return await this.eventsService.deleteEvent(id);
   }
 }
