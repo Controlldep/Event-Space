@@ -12,7 +12,7 @@ export class SessionRepository {
     private readonly sessionRepository: Repository<SessionEntity>,
   ) {}
 
-  async saveSession(dto: SessionInputDto) {
+  async saveSession(dto: SessionInputDto): Promise<void> {
     const maxSessions = 5;
 
     const [sessions, count] = await this.sessionRepository.findAndCount({
@@ -21,7 +21,7 @@ export class SessionRepository {
     });
 
     if (count >= maxSessions) {
-      const oldestSession = sessions[0];
+      const oldestSession: SessionEntity = sessions[0];
       await this.sessionRepository.delete(oldestSession.id);
     }
     await this.sessionRepository.save(dto);
@@ -45,11 +45,11 @@ export class SessionRepository {
     });
   }
 
-  async updateSession(userId: string, deviceId: string, dto: UpdateSessionDto) {
+  async updateSession(userId: string, deviceId: string, dto: UpdateSessionDto): Promise<void> {
     await this.sessionRepository.update({ userId, deviceId }, dto);
   }
 
-  async updateRefreshForSession(userId: string, deviceId: string, refreshTokenHash: string) {
+  async updateRefreshForSession(userId: string, deviceId: string, refreshTokenHash: string): Promise<void> {
     await this.sessionRepository.update({ userId, deviceId }, { refreshTokenHash });
   }
 

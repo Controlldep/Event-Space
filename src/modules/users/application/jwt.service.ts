@@ -13,7 +13,7 @@ export class JwtService {
   }
 
   //TODO придумать как сделать через энв
-  createRefreshToken(userId: string, deviceId: string) {
+  createRefreshToken(userId: string, deviceId: string): string {
     return jwt.sign({ userId, deviceId }, this.configService.get('JWT_SECRET_REFRESH')!, { expiresIn: '20m' });
   }
 }

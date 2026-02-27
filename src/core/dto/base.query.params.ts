@@ -1,9 +1,9 @@
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export enum SortDirection {
-  Asc = 'asc',
-  Desc = 'desc',
+  Asc = 'ASC',
+  Desc = 'DESC',
 }
 
 export class BaseQueryParams {
@@ -21,10 +21,7 @@ export class BaseQueryParams {
   pageSize: number = 10;
 
   @IsOptional()
+  @Transform(({ value }) => value.toUpperCase() ?? SortDirection.Desc)
   @IsEnum(SortDirection)
   sortDirection: SortDirection = SortDirection.Desc;
-
-  calculateSkip() {
-    return (this.pageNumber - 1) * this.pageSize;
-  }
 }

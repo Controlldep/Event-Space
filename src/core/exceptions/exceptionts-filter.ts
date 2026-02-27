@@ -1,11 +1,5 @@
 import { CustomHttpException, DomainExceptionCode } from './domain.exceptions';
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpStatus,
-  ValidationError,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch(CustomHttpException)
@@ -24,20 +18,9 @@ export class CustomExceptionFilter implements ExceptionFilter {
         return response.status(this.mapToHttpStatus(status)).send();
     }
     if (status === DomainExceptionCode.BAD_REQUEST) {
-      // const errors = exception.details.map((error: ValidationError) => ({
-      //   message: error.constraints
-      //     ? Object.values(error.constraints)[0]
-      //     : 'Invalid value',
-      //   field: error.property,
-      // }));
-      // return response.status(HttpStatus.BAD_REQUEST).json({
-      //   errorsMessages: errors,
-      // });
       const errors = exception.details
         ? exception.details.map((error: any) => ({
-            message: error.constraints
-              ? Object.values(error.constraints)[0]
-              : 'Invalid value',
+            message: error.constraints ? Object.values(error.constraints)[0] : 'Invalid value',
             field: error.property,
           }))
         : [{ message: exception.message || 'Domain error', field: 'logic' }]; // Дефолтный вариант
