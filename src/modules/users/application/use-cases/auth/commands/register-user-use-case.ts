@@ -1,10 +1,10 @@
-import { UserRepository } from '../../../infrastructure/user.repository';
-import { PasswordService } from '../../password.service';
-import { AuthRegistrationUserInputDto } from '../../../api/input-dto/auth-registration-user.input.dto';
-import { UserEntity } from '../../../domain/user.entity';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
+import { UserRepository } from '../../../../infrastructure/user.repository';
+import { PasswordService } from '../../../password.service';
+import { AuthRegistrationUserInputDto } from '../../../../api/input-dto/auth-registration-user.input.dto';
+import { UserEntity } from '../../../../domain/user.entity';
+import { CustomHttpException, DomainExceptionCode } from '../../../../../../core/exceptions/domain.exceptions';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateUserDomainModel } from '../../../domain/input-dto/user-domain.model';
+import { CreateUserDomainModel } from '../../../../domain/input-dto/user-domain.model';
 
 export class RegisterUserCommand {
   constructor(public readonly user: AuthRegistrationUserInputDto) {}

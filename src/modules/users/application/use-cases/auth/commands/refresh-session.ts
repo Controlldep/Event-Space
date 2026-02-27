@@ -1,7 +1,7 @@
-import { JwtService } from '../../jwt.service';
-import { SessionService } from '../../session.service';
+import { JwtService } from '../../../jwt.service';
+import { SessionService } from '../../../session.service';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PasswordService } from '../../password.service';
+import { PasswordService } from '../../../password.service';
 
 export class RefreshSessionCommand {
   constructor(

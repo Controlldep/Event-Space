@@ -1,17 +1,17 @@
-import { UserRepository } from '../../../infrastructure/user.repository';
-import { PasswordService } from '../../password.service';
-import { JwtService } from '../../jwt.service';
-import { SessionService } from '../../session.service';
-import { UserEntity } from '../../../domain/user.entity';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
-import { AuthUserInputDto } from '../../../api/input-dto/auth-user.input.dto';
-import { SessionInputDto } from '../../../domain/input-dto/session.input.dto';
-import { createSession } from '../../../api/helpers/create-session';
+import { UserRepository } from '../../../../infrastructure/user.repository';
+import { PasswordService } from '../../../password.service';
+import { JwtService } from '../../../jwt.service';
+import { SessionService } from '../../../session.service';
+import { UserEntity } from '../../../../domain/user.entity';
+import { CustomHttpException, DomainExceptionCode } from '../../../../../../core/exceptions/domain.exceptions';
+import { AuthUserInputDto } from '../../../../api/input-dto/auth-user.input.dto';
+import { SessionInputDto } from '../../../../domain/input-dto/session.input.dto';
+import { createSession } from '../../../../api/helpers/create-session';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { createDeviceId } from '../../../api/helpers/create-device-id';
-import { SessionEntity } from '../../../domain/session.entity';
-import { UpdateUserSession } from '../../helpers/update-session';
-import { UpdateSessionDto } from '../../dto/input/update-session.dto';
+import { createDeviceId } from '../../../../api/helpers/create-device-id';
+import { SessionEntity } from '../../../../domain/session.entity';
+import { UpdateUserSession } from '../../../helpers/update-session';
+import { UpdateSessionDto } from '../../../dto/input/update-session.dto';
 import { ConfigService } from '@nestjs/config';
 
 export class LoginUserCommand {
@@ -50,16 +50,16 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     console.log(existingSession);
     if (!existingSession) deviceId = createDeviceId();
 
-    const refreshToken = this.jwtService.createRefreshToken(user.id, deviceId!);
-    const refreshTokenHash = this.passwordService.hashRefreshToken(refreshToken);
+    const refreshToken: string = this.jwtService.createRefreshToken(user.id, deviceId!);
+    const refreshTokenHash: string = this.passwordService.hashRefreshToken(refreshToken);
 
     if (!existingSession) {
-      const maxAge = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
-      const sessionDto = createSession(user.id, deviceId!, ip, userAgent, refreshTokenHash, maxAge);
+      const maxAge: string = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
+      const sessionDto: SessionInputDto = createSession(user.id, deviceId!, ip, userAgent, refreshTokenHash, maxAge);
       await this.sessionService.saveSession(sessionDto);
     } else {
-      const maxAge = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
-      const updateDto = UpdateUserSession(ip, userAgent, refreshTokenHash, maxAge);
+      const maxAge: string = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
+      const updateDto: UpdateSessionDto = UpdateUserSession(ip, userAgent, refreshTokenHash, maxAge);
       await this.sessionService.updateSession(user.id, deviceId!, updateDto);
     }
 

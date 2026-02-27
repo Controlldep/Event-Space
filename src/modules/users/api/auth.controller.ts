@@ -1,23 +1,27 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Res, UseGuards } from '@nestjs/common';
 import { SessionService } from '../application/session.service';
 import { Throttle } from '@nestjs/throttler';
 import { CustomThrottlerGuard } from '../guards/trottler.guard';
 import { AuthUserInputDto } from './input-dto/auth-user.input.dto';
 import { AuthRegistrationUserInputDto } from './input-dto/auth-registration-user.input.dto';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { RefreshAuthGuard } from '../guards/refresh-auth.guard';
 import { CurrentUser } from '../../../core/decorators/extract-user-from-request';
 import type { ActiveUserData } from '../../../core/decorators/extract-user-from-request';
 import { CommandBus } from '@nestjs/cqrs';
-import { LoginUserCommand } from '../application/use-cases/auth/login-user-use-case';
-import { RegisterUserCommand } from '../application/use-cases/auth/register-user-use-case';
-import { RefreshSessionCommand } from '../application/use-cases/auth/refresh-session';
+import { LoginUserCommand } from '../application/use-cases/auth/commands/login-user-use-case';
+import { RegisterUserCommand } from '../application/use-cases/auth/commands/register-user-use-case';
+import { RefreshSessionCommand } from '../application/use-cases/auth/commands/refresh-session';
 import { GetUserIp } from '../../../core/decorators/get-user-ip';
 import { GetUserAgent } from '../../../core/decorators/get-user-agent';
 import { IdentificationGuard } from '../guards/Identification.guard';
 import { GetUserDeviceId } from '../../../core/decorators/get-user-device-id';
 import ms, { StringValue } from 'ms';
 import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { GetProfileQuery } from '../application/use-cases/auth/query/get-profile-use-case';
+import { UserEntity } from '../domain/user.entity';
+import { SessionEntity } from '../domain/session.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -68,6 +72,13 @@ export class AuthController {
   }
 
   @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Post('profile')
+  async profile(@CurrentUser() user: ActiveUserData): Promise<UserEntity | null> {
+    return await this.commandBus.execute(new GetProfileQuery(user));
+  }
+
+  @HttpCode(200)
   @UseGuards(RefreshAuthGuard)
   @Post('refresh-token')
   async refreshTokenHandler(@CurrentUser() user: ActiveUserData, @Res({ passthrough: true }) res: Response) {
@@ -97,7 +108,7 @@ export class AuthController {
 
   @UseGuards(RefreshAuthGuard)
   @Get('session')
-  async getAllSessions(@CurrentUser() user: ActiveUserData) {
+  async getAllSessions(@CurrentUser() user: ActiveUserData): Promise<SessionEntity[]> {
     return await this.sessionService.getAllDevices(user.userId);
   }
 }

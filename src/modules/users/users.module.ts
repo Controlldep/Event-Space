@@ -22,10 +22,11 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { UsersQueryRepository } from './infrastructure/users-query.repository';
 import { GetAllUsersUseCase } from './application/use-cases/account/queries/get-all-users-use-case';
 import { GetUsersByIdUseCase } from './application/use-cases/account/queries/get-users-by-id-use-case';
-import { LoginUserUseCase } from './application/use-cases/auth/login-user-use-case';
-import { RegisterUserUseCase } from './application/use-cases/auth/register-user-use-case';
-import { RefreshSessionUseCase } from './application/use-cases/auth/refresh-session';
+import { LoginUserUseCase } from './application/use-cases/auth/commands/login-user-use-case';
+import { RegisterUserUseCase } from './application/use-cases/auth/commands/register-user-use-case';
+import { RefreshSessionUseCase } from './application/use-cases/auth/commands/refresh-session';
 import { IdentificationGuard } from './guards/Identification.guard';
+import { GetProfileUseCase } from './application/use-cases/auth/query/get-profile-use-case';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { IdentificationGuard } from './guards/Identification.guard';
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    GetProfileUseCase,
     IdentificationGuard,
     UserRepository,
     PasswordService,
