@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserEntity } from '../../users/domain/user.entity';
 import { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { CreateEventDto } from '../api/input-dto/create-event.dto';
@@ -18,6 +18,9 @@ export class EventEntity {
   @Column()
   maxParticipants: number;
 
+  @Column({ default: 0 })
+  currentParticipantsCount: number;
+
   @Column({ type: 'timestamp' })
   startTime: Date;
 
@@ -36,6 +39,12 @@ export class EventEntity {
   @Column('uuid')
   organizerId: string;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   @ManyToOne(() => UserEntity, (user) => user.events)
   @JoinColumn({ name: 'organizerId' })
   user: UserEntity;
@@ -53,6 +62,7 @@ export class EventEntity {
     event.endTime = dto.endTime;
     event.location = dto.location;
     event.category = dto.category;
+    event.currentParticipantsCount = 0;
 
     return event;
   }

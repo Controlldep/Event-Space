@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserEntity } from '../../users/domain/user.entity';
 import { CreateTicketDto } from './input-dto/create-ticket.dto';
 import { EventEntity } from '../../events/domain/event.entity';
@@ -13,6 +13,12 @@ export class TicketEntity {
 
   @Column('uuid')
   eventId: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.tickets)
   @JoinColumn({ name: 'userId' })
