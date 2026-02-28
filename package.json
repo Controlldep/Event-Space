@@ -92,6 +92,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "moduleNameMapper": {
+      "^uuid$": "uuid"
+    },
     "collectCoverageFrom": [
       "src/**/*.(t|j)s"
     ],
