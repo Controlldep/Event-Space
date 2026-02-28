@@ -18,7 +18,7 @@ jobs:
           node-version: 20
 
       - name: Install Deps
-        run: npm install
+        run: yarn install
 
       - name: Build Project
-        run: npm run build
+        run: yarn build
