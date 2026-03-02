@@ -1,8 +1,8 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserRole } from './enum/user-role.type';
-import { EventEntity } from '../../events/domain/event.entity';
-import { TicketEntity } from '../../tickets/domain/ticket.entity';
-import { SessionEntity } from './session.entity';
+import type { EventEntity } from '../../events/domain/event.entity';
+import type { TicketEntity } from '../../tickets/domain/ticket.entity';
+import type { SessionEntity } from './session.entity';
 import { CreateUserDomainModel } from './input-dto/user-domain.model';
 
 @Entity('users')
@@ -32,13 +32,13 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => EventEntity, (event) => event.user)
+  @OneToMany('EventEntity', (event: EventEntity) => event.user)
   events: EventEntity[];
 
-  @OneToMany(() => SessionEntity, (session) => session.user)
+  @OneToMany('SessionEntity', (session: SessionEntity) => session.user)
   sessions: SessionEntity[];
 
-  @OneToMany(() => TicketEntity, (ticket) => ticket.user)
+  @OneToMany('TicketEntity', (ticket: TicketEntity) => ticket.user)
   tickets: TicketEntity[];
 
   static createInstance(dto: CreateUserDomainModel): UserEntity {

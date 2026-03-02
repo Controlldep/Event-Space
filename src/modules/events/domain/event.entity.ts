@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { UserEntity } from '../../users/domain/user.entity';
-import { TicketEntity } from '../../tickets/domain/ticket.entity';
+import type { UserEntity } from '../../users/domain/user.entity';
+import type { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { CreateEventDto } from '../api/input-dto/create-event.dto';
 import { EventCategory } from './enum/event-category';
 
@@ -21,10 +21,10 @@ export class EventEntity {
   @Column({ default: 0 })
   currentParticipantsCount: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   startTime: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   endTime: Date;
 
   @Column()
@@ -45,11 +45,11 @@ export class EventEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.events)
+  @ManyToOne('UserEntity', (user: UserEntity) => user.events)
   @JoinColumn({ name: 'organizerId' })
   user: UserEntity;
 
-  @OneToMany(() => TicketEntity, (ticket) => ticket.event)
+  @OneToMany('TicketEntity', (ticket: TicketEntity) => ticket.event)
   tickets: TicketEntity[];
 
   static createInstance(dto: CreateEventDto, organizerId: string): EventEntity {

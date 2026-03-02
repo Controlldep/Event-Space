@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
-import { UserEntity } from './user.entity';
+import type { UserEntity } from './user.entity';
 import { SessionInputDto } from './input-dto/session.input.dto';
 
 @Entity('session')
@@ -35,7 +35,7 @@ export class SessionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.sessions, { onDelete: 'CASCADE' })
+  @ManyToOne('UserEntity', (user: UserEntity) => user.sessions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
