@@ -69,3 +69,28 @@ jobs:
 
       - name: Build Project
         run: yarn build
+
+      - name: Build Docker Image
+        run: docker build -t event-space-check .
+
+      - name: Verify Docker Container Startup
+        run: |
+          docker run -d --name api-check \
+            --network host \
+            -e NODE_ENV=test \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e DB_USERNAME=test_user \
+            -e DB_PASSWORD=test_password \
+            -e DB_DATABASE=test_db \
+            -e JWT_SECRET=123 \
+            event-space-check
+          
+          sleep 10
+          
+          if [ $(docker inspect -f '{{.State.Running}}' api-check) != "true" ]; then
+            echo "Container failed to start. Printing logs"
+            docker logs api-check
+            exit 1
+          fi
+          echo "Container is running"
