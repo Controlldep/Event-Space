@@ -11,7 +11,7 @@ import type { ActiveUserData } from '../../../core/decorators/extract-user-from-
 import { CommandBus } from '@nestjs/cqrs';
 import { LoginUserCommand } from '../application/use-cases/auth/commands/login-user-use-case';
 import { RegisterUserCommand } from '../application/use-cases/auth/commands/register-user-use-case';
-import { RefreshSessionCommand } from '../application/use-cases/auth/commands/refresh-session';
+import { RefreshSessionCommand } from '../application/use-cases/auth/commands/refresh-session-use-case';
 import { GetUserIp } from '../../../core/decorators/get-user-ip';
 import { GetUserAgent } from '../../../core/decorators/get-user-agent';
 import { IdentificationGuard } from '../guards/Identification.guard';
@@ -32,7 +32,7 @@ export class AuthController {
   ) {}
 
   @HttpCode(200)
-  @UseGuards(CustomThrottlerGuard)
+  @UseGuards(CustomThrottlerGuard, IdentificationGuard)
   @Throttle({ default: { limit: 5, ttl: 10_000 } })
   @Post('registration')
   async registration(
@@ -43,7 +43,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.commandBus.execute(new RegisterUserCommand(dto));
-    return this.login(dto, ip, userAgent, deviceId, res);
+    return await this.login(dto, ip, userAgent, deviceId, res);
   }
 
   @UseGuards(CustomThrottlerGuard, IdentificationGuard)
@@ -73,7 +73,7 @@ export class AuthController {
 
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  @Post('profile')
+  @Get('profile')
   async profile(@CurrentUser() user: ActiveUserData): Promise<UserEntity | null> {
     return await this.commandBus.execute(new GetProfileQuery(user));
   }

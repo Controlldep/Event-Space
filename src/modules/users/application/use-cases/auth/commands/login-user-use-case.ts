@@ -47,7 +47,6 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     if (deviceId) {
       existingSession = await this.sessionService.findSessionByDeviceIdAndUserId(user.id, deviceId);
     }
-    console.log(existingSession);
     if (!existingSession) deviceId = createDeviceId();
 
     const refreshToken: string = this.jwtService.createRefreshToken(user.id, deviceId!);

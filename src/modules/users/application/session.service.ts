@@ -17,10 +17,6 @@ export class SessionService {
     return await this.sessionRepositories.getAllSessionsByUser(userId);
   }
 
-  async findSessionByDeviceId(deviceId: string): Promise<SessionEntity | null> {
-    return await this.sessionRepositories.findSessionByDeviceId(deviceId);
-  }
-
   async findSessionByDeviceIdAndUserId(userId: string, deviceId: string): Promise<SessionEntity | null> {
     return await this.sessionRepositories.findSessionByDeviceIdAndUserId(userId, deviceId);
   }

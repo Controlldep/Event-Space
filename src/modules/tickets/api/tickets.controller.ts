@@ -4,7 +4,7 @@ import { type ActiveUserData, CurrentUser } from '../../../core/decorators/extra
 import { TicketEntity } from '../domain/ticket.entity';
 import { BaseQueryParams } from '../../../core/dto/base.query.params';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateTicketsCommand } from '../application/use-case/command/create-tickets';
+import { CreateTicketsCommand } from '../application/use-case/command/create-tickets-use-case';
 import { DeleteTicketCommand } from '../application/use-case/command/delete-ticket-use-case';
 import { GetMyTicketsQuery } from '../application/use-case/query/get-my-tickets-use-case';
 

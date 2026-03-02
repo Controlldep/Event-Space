@@ -63,7 +63,6 @@ export class UpdateEventUseCase implements ICommandHandler<UpdateEventCommand> {
             endTime: MoreThan(new Date(finalStart - HOUR_IN_MS)),
           },
         });
-
         if (conflict) {
           throw new CustomHttpException(
             DomainExceptionCode.BAD_REQUEST,

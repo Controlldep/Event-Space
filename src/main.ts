@@ -11,7 +11,7 @@ import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.set('trust proxy');
+  app.set('trust proxy', true);
 
   app.useGlobalPipes(
     new ValidationPipe({

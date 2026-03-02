@@ -9,6 +9,7 @@ import { CreateEventCommand } from '../application/use-case/command/create-event
 import { UpdateEventCommand } from '../application/use-case/command/update-event-use-case';
 import { EventEntity } from '../domain/event.entity';
 import { DeleteResult } from 'typeorm';
+import { UpdateEventDto } from './input-dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -35,7 +36,7 @@ export class EventsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async patchEvent(@CurrentUser() user: ActiveUserData, @Param('id') id: string, @Body() dto: CreateEventDto): Promise<EventEntity> {
+  async patchEvent(@CurrentUser() user: ActiveUserData, @Param('id') id: string, @Body() dto: UpdateEventDto): Promise<EventEntity> {
     return await this.commandBus.execute(new UpdateEventCommand(id, dto, user));
   }
 

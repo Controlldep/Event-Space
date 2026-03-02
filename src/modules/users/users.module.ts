@@ -24,7 +24,7 @@ import { GetAllUsersUseCase } from './application/use-cases/account/queries/get-
 import { GetUsersByIdUseCase } from './application/use-cases/account/queries/get-users-by-id-use-case';
 import { LoginUserUseCase } from './application/use-cases/auth/commands/login-user-use-case';
 import { RegisterUserUseCase } from './application/use-cases/auth/commands/register-user-use-case';
-import { RefreshSessionUseCase } from './application/use-cases/auth/commands/refresh-session';
+import { RefreshSessionUseCase } from './application/use-cases/auth/commands/refresh-session-use-case';
 import { IdentificationGuard } from './guards/Identification.guard';
 import { GetProfileUseCase } from './application/use-cases/auth/query/get-profile-use-case';
 
@@ -38,6 +38,7 @@ import { GetProfileUseCase } from './application/use-cases/auth/query/get-profil
         {
           ttl: 10_000,
           limit: 5,
+          skipIf: () => process.env.NODE_ENV === 'test',
         },
       ],
     }),

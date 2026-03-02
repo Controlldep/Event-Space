@@ -21,7 +21,7 @@ export class RegisterUserUseCase implements ICommandHandler<RegisterUserCommand>
     const { user } = command;
 
     const isEmailTaken: boolean = await this.usersRepository.existsByEmail(user.email);
-    if (isEmailTaken) throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST);
+    if (isEmailTaken) throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST, 'User with this email already exists');
 
     const passwordHash: string = await this.passwordService.hashPassword(user.password);
     const domainModel: CreateUserDomainModel = {
@@ -32,14 +32,6 @@ export class RegisterUserUseCase implements ICommandHandler<RegisterUserCommand>
     };
 
     const userEntity: UserEntity = UserEntity.createInstance(domainModel);
-    console.log(userEntity);
-    try {
-      return await this.usersRepository.saveUser(userEntity);
-    } catch (error: any) {
-      if (error?.code === '23505') {
-        throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST);
-      }
-      throw error;
-    }
+    return await this.usersRepository.saveUser(userEntity);
   }
 }
