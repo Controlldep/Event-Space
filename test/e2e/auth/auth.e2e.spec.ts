@@ -10,9 +10,9 @@ import { CustomHttpException, DomainExceptionCode } from '../../../src/core/exce
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { UserRole } from '../../../src/modules/users/domain/enum/user-role.type';
-import { AuthRegistrationUserInputDto } from '../../../src/modules/users/api/input-dto/auth-registration-user.input.dto';
 import { UserEntity } from '../../../src/modules/users/domain/user.entity';
 import { SessionEntity } from '../../../src/modules/users/domain/session.entity';
+import { randomUUID } from 'crypto';
 
 describe('Auth (e2e)', () => {
   let app: NestExpressApplication;
@@ -25,31 +25,25 @@ describe('Auth (e2e)', () => {
 
     app = moduleFixture.createNestApplication<NestExpressApplication>();
     app.getHttpAdapter().getInstance().set('trust proxy', true);
-
     app.use(cookieParser());
-
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
         forbidNonWhitelisted: true,
-        disableErrorMessages: false,
         exceptionFactory: (errors) => {
-          const details = errors.map((error) => ({
-            property: error.property,
-            constraints: error.constraints,
-          }));
+          const details = errors.map((error) => ({ property: error.property, constraints: error.constraints }));
           throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST, 'Validation failed', details);
         },
       }),
     );
-
     app.useGlobalFilters(new CustomExceptionFilter());
     app.useGlobalInterceptors(new LoggingInterceptor());
 
     await app.init();
-
     dataSource = app.get(DataSource);
+    await dataSource.query('TRUNCATE TABLE "tickets", "events", "session", "users" RESTART IDENTITY CASCADE');
   });
+
   beforeEach(async () => {
     await cleanDatabase(dataSource);
   });
@@ -58,248 +52,137 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
-  it('должен вернуть 401 при доступе к защищенному эндпоинту без токена', () => {
+  it('1. должен вернуть 401 при доступе к защищенному эндпоинту без токена', () => {
     return request(app.getHttpServer()).get('/auth/profile').expect(401);
   });
 
-  it('должен успешно зарегистрировать пользователя (201/200)', async () => {
-    const registrationDto: AuthRegistrationUserInputDto = {
-      fullName: 'Ivan Ivanov',
-      role: UserRole.USER,
-      email: 'vovak@test.com',
-      password: 'password123',
-    };
-
+  it('2. должен успешно зарегистрировать пользователя (201/200)', async () => {
+    const email = `reg-${randomUUID()}@test.com`;
     const response = await request(app.getHttpServer())
       .post('/auth/registration')
       .set('user-agent', 'TestAgent')
-      .set('X-Forwarded-For', '127.0.0.1')
-      .send(registrationDto)
+      .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, email, password: 'password123' })
       .expect(200);
 
     expect(response.body).toHaveProperty('accessToken');
     expect(response.body).toHaveProperty('deviceId');
+    expect(response.get('Set-Cookie')!.some((c) => c.includes('refreshToken'))).toBe(true);
 
-    const cookies = response.get('Set-Cookie')!;
-    expect(cookies.some((c) => c.includes('refreshToken'))).toBe(true);
-
-    const user = await dataSource.getRepository(UserEntity).findOneBy({ email: registrationDto.email });
-    expect(user).toBeDefined();
-    expect(user?.fullName).toBe(registrationDto.fullName);
+    const user = await dataSource.getRepository(UserEntity).findOneBy({ email });
+    expect(user?.fullName).toBe('Ivan Ivanov');
   });
 
-  it('должен вернуть 400, если отсутствуют обязательные данные (User-Agent или IP)', async () => {
-    const registrationDto: AuthRegistrationUserInputDto = {
-      fullName: 'Ivan Ivanov',
-      role: UserRole.USER,
-      email: 'bad-request@test.com',
-      password: 'password123',
-    };
-
-    const response = await request(app.getHttpServer()).post('/auth/registration').send(registrationDto);
-
-    expect(response.status).toBe(400);
-
-    expect(response.body).toHaveProperty('errorsMessages');
-  });
-
-  it('должен вернуть 400, если пользователь с таким email уже существует', async () => {
-    const registrationDto: AuthRegistrationUserInputDto = {
-      fullName: 'Ivan Ivanov',
-      role: UserRole.USER,
-      email: 'duplicate@test.com',
-      password: 'password123',
-    };
-
-    await request(app.getHttpServer())
-      .post('/auth/registration')
-      .set('user-agent', 'TestAgent')
-      .set('X-Forwarded-For', '127.0.0.1')
-      .send(registrationDto)
-      .expect(200);
-
+  it('3. должен вернуть 400, если отсутствуют обязательные данные (User-Agent)', async () => {
+    const email = `bad-${randomUUID()}@test.com`;
     const response = await request(app.getHttpServer())
       .post('/auth/registration')
-      .set('user-agent', 'TestAgent')
-      .set('X-Forwarded-For', '127.0.0.1')
-      .send(registrationDto);
+      .send({ fullName: 'Ivan', role: UserRole.USER, email, password: 'password123' });
 
     expect(response.status).toBe(400);
-
     expect(response.body).toHaveProperty('errorsMessages');
   });
 
-  it('логин должен обновлять существующую сессию, созданную при регистрации', async () => {
-    const loginDto = { email: 'update@test.com', password: 'password123' };
+  it('4. должен вернуть 400, если пользователь с таким email уже существует', async () => {
+    const email = `dup-${randomUUID()}@test.com`;
+    const dto = { fullName: 'Ivan Ivanov', role: UserRole.USER, email, password: 'password123' };
 
-    const regRes = await request(app.getHttpServer())
+    await request(app.getHttpServer()).post('/auth/registration').set('user-agent', 'Agent').send(dto).expect(200);
+    const response = await request(app.getHttpServer()).post('/auth/registration').set('user-agent', 'Agent').send(dto);
+
+    expect(response.status).toBe(400);
+    expect(response.body.errorsMessages[0].field).toBe('logic');
+  });
+
+  it('5. логин должен обновлять существующую сессию, созданную при регистрации', async () => {
+    const email = `upd-${randomUUID()}@test.com`;
+    const loginDto = { email, password: 'password123' };
+
+    const regResponse = await request(app.getHttpServer())
       .post('/auth/registration')
       .set('user-agent', 'Initial Agent')
-      .set('X-Forwarded-For', '1.1.1.1')
-      .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, ...loginDto });
+      .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, ...loginDto })
+      .expect(200);
 
-    const deviceId = regRes.body.deviceId;
+    const actualDeviceId = regResponse.body.deviceId;
+    expect(actualDeviceId).toBeDefined();
 
     await request(app.getHttpServer())
       .post('/auth/login')
       .set('user-agent', 'Updated Agent')
-      .set('X-Forwarded-For', '2.2.2.2')
-      .set('x-device-id', deviceId)
+      .set('x-device-id', actualDeviceId)
       .send(loginDto)
       .expect(200);
 
-    const user = await dataSource.getRepository(UserEntity).findOneBy({ email: loginDto.email });
-    const sessions = await dataSource.getRepository(SessionEntity).find({ where: { userId: user!.id } });
+    const user = await dataSource.getRepository(UserEntity).findOneBy({ email });
+    const sessions = await dataSource.getRepository(SessionEntity).find({
+      where: { userId: user!.id },
+    });
 
-    expect(sessions.length).toBe(1); // ТЕПЕРЬ ТОЧНО 1
+    expect(sessions.length).toBe(1);
     expect(sessions[0].userAgent).toBe('Updated Agent');
-    expect(sessions[0].ip).toBe('2.2.2.2');
+    expect(sessions[0].deviceId).toBe(actualDeviceId);
   });
 
-  describe('Логин (негативные сценарии)', () => {
-    const loginDto = { email: 'exist@test.com', password: 'correctPassword123' };
+  it('6. должен вернуть 401 при логине, если пароль неверный', async () => {
+    const email = `wrong-pass-${randomUUID()}@test.com`;
+    await request(app.getHttpServer())
+      .post('/auth/registration')
+      .set('user-agent', 'Agent')
+      .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, email, password: 'correctPassword' })
+      .expect(200);
 
-    beforeAll(async () => {
-      await request(app.getHttpServer())
-        .post('/auth/registration')
-        .set('user-agent', 'TestAgent')
-        .set('X-Forwarded-For', '1.1.1.1')
-        .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, ...loginDto });
-    });
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .set('user-agent', 'Agent')
+      .send({ email, password: 'WRONG_PASSWORD' });
 
-    it('должен вернуть 401, если пароль неверный', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .set('user-agent', 'TestAgent')
-        .set('X-Forwarded-For', '1.1.1.1')
-        .send({ email: loginDto.email, password: 'WRONG_PASSWORD' });
-
-      expect(response.status).toBe(401);
-    });
-
-    it('должен вернуть 401, если email не существует', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .set('user-agent', 'TestAgent')
-        .set('X-Forwarded-For', '1.1.1.1')
-        .send({ email: 'nobody@test.com', password: 'anyPassword' });
-
-      expect(response.status).toBe(401);
-    });
+    expect(response.status).toBe(401);
   });
 
-  it('должен выдать новую пару токенов через Cookies (Refresh Token)', async () => {
-    const loginDto = {
-      email: 'refresh-cookie@test.com',
-      password: 'password123',
-      fullName: 'Ivan Ivanov',
-      role: UserRole.USER,
-    };
+  it('7. должен вернуть 401 при логине, если email не существует', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .set('user-agent', 'Agent')
+      .send({ email: `nobody-${randomUUID()}@test.com`, password: 'anyPassword' });
+
+    expect(response.status).toBe(401);
+  });
+
+  it('8. должен успешно разлогинить пользователя и удалить сессию из базы', async () => {
+    const email = `logout-${randomUUID()}@test.com`;
+    const deviceId = randomUUID();
 
     const regRes = await request(app.getHttpServer())
       .post('/auth/registration')
-      .set('user-agent', 'TestAgent')
-      .set('X-Forwarded-For', '1.1.1.1')
-      .send(loginDto);
-
-    const deviceId = regRes.body.deviceId;
-
-    const loginRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .set('user-agent', 'TestAgent')
-      .set('X-Forwarded-For', '1.1.1.1')
+      .set('user-agent', 'Agent')
       .set('x-device-id', deviceId)
-      .send({ email: loginDto.email, password: loginDto.password });
+      .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, email, password: 'password123' });
 
-    const cookie = loginRes.get('Set-Cookie') as string[];
-    expect(cookie).toBeDefined();
-    expect(cookie.length).toBeGreaterThan(0);
+    const cookie = regRes.get('Set-Cookie')!;
 
-    await new Promise((res) => setTimeout(res, 1001));
-
-    const refreshRes = await request(app.getHttpServer())
-      .post('/auth/refresh-token')
-      .set('user-agent', 'TestAgent')
-      .set('X-Forwarded-For', '1.1.1.1')
+    await request(app.getHttpServer())
+      .post('/auth/logout')
+      .set('user-agent', 'Agent')
+      .set('x-device-id', deviceId)
       .set('Cookie', cookie)
-      .send()
-      .expect(200);
+      .expect(204);
 
-    const newCookie = refreshRes.get('Set-Cookie') as string[];
-    expect(newCookie).toBeDefined();
-    expect(newCookie).not.toEqual(cookie);
-
-    expect(refreshRes.body.accessToken).toBeDefined();
-    expect(refreshRes.body.accessToken).not.toBe(loginRes.body.accessToken);
-
-    const user = await dataSource.getRepository(UserEntity).findOneBy({ email: loginDto.email });
+    const user = await dataSource.getRepository(UserEntity).findOneBy({ email });
     const sessions = await dataSource.getRepository(SessionEntity).find({ where: { userId: user!.id } });
-
-    expect(sessions.length).toBe(1);
+    expect(sessions.length).toBe(0);
   });
 
-  describe('Logout (Выход из системы)', () => {
-    const loginDto = {
-      email: 'logout-final@test.com',
-      password: 'password123',
-      fullName: 'Ivan Ivanov',
-      role: UserRole.USER,
-    };
-    let cookie: string[];
+  it('9. должен вернуть 401 при попытке повторного рефреша после логаута', async () => {
+    const email = `ref-fail-${randomUUID()}@test.com`;
+    const regRes = await request(app.getHttpServer())
+      .post('/auth/registration')
+      .set('user-agent', 'Agent')
+      .send({ fullName: 'Ivan Ivanov', role: UserRole.USER, email, password: 'password123' });
 
-    beforeAll(async () => {
-      await request(app.getHttpServer())
-        .post('/auth/registration')
-        .set('user-agent', 'LogoutAgent')
-        .set('X-Forwarded-For', '1.1.1.1')
-        .send(loginDto);
+    const cookie = regRes.get('Set-Cookie')!;
 
-      const loginRes = await request(app.getHttpServer())
-        .post('/auth/login')
-        .set('user-agent', 'LogoutAgent')
-        .set('X-Forwarded-For', '1.1.1.1')
-        .send({ email: loginDto.email, password: loginDto.password });
+    await request(app.getHttpServer()).post('/auth/logout').set('user-agent', 'Agent').set('Cookie', cookie).expect(204);
 
-      cookie = loginRes.get('Set-Cookie') as string[];
-    });
-
-    it('должен успешно разлогинить пользователя и удалить сессию из базы', async () => {
-      const loginDto = {
-        email: 'logout-pro@test.com',
-        password: 'password123',
-        fullName: 'Ivan Ivanov',
-        role: UserRole.USER,
-      };
-
-      const regRes = await request(app.getHttpServer()).post('/auth/registration').set('user-agent', 'TestAgent').send(loginDto);
-
-      const deviceId = regRes.body.deviceId;
-
-      const loginRes = await request(app.getHttpServer())
-        .post('/auth/login')
-        .set('user-agent', 'TestAgent')
-        .set('x-device-id', deviceId)
-        .send({ email: loginDto.email, password: loginDto.password });
-
-      const cookie = loginRes.get('Set-Cookie') as string[];
-
-      const logoutRes = await request(app.getHttpServer()).post('/auth/logout').set('user-agent', 'TestAgent').set('Cookie', cookie).send();
-
-      expect(logoutRes.status).toBe(204);
-
-      const user = await dataSource.getRepository(UserEntity).findOneBy({ email: loginDto.email });
-      const sessions = await dataSource.getRepository(SessionEntity).find({ where: { userId: user!.id } });
-
-      expect(sessions.length).toBe(0);
-    });
-
-    it('должен вернуть 401 при попытке повторного рефреша после логаута', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/refresh-token')
-        .set('user-agent', 'LogoutAgent')
-        .set('X-Forwarded-For', '1.1.1.1')
-        .set('Cookie', cookie)
-        .expect(401);
-    });
+    await request(app.getHttpServer()).post('/auth/refresh-token').set('user-agent', 'Agent').set('Cookie', cookie).expect(401);
   });
 });

@@ -7,8 +7,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CustomHttpException, DomainExceptionCode } from '../../../src/core/exceptions/domain.exceptions';
 import { CustomExceptionFilter } from '../../../src/core/exceptions/exceptionts-filter';
+import { cleanDatabase } from '../../helpers/db-cleaner';
+import { randomUUID } from 'crypto';
 
-const TEST_DEVICE = 'f3bce883-2981-4faa-9f8f-465ef0214b09';
 const TEST_AGENT = 'TestAgent/1.0';
 
 describe('Tickets (e2e)', () => {
@@ -28,7 +29,7 @@ describe('Tickets (e2e)', () => {
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
-        exceptionFactory: (errors) => {
+        exceptionFactory: () => {
           throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST, 'Validation failed');
         },
       }),
@@ -39,37 +40,40 @@ describe('Tickets (e2e)', () => {
   });
 
   beforeEach(async () => {
-    await dataSource.query('TRUNCATE TABLE "tickets", "events", "session", "users" RESTART IDENTITY CASCADE');
+    await cleanDatabase(dataSource);
 
-    await request(app.getHttpServer()).post('/auth/registration').set('user-agent', TEST_AGENT).set('x-device-id', TEST_DEVICE).send({
-      email: 'org@test.com',
-      password: 'password123',
-      fullName: 'Ivan Организатор',
-      role: 'organizer',
-    });
+    const orgEmail = `org-${randomUUID()}@test.com`;
+    const orgDeviceId = randomUUID();
 
-    const loginRes = await request(app.getHttpServer())
-      .post('/auth/login')
+    const regRes = await request(app.getHttpServer())
+      .post('/auth/registration')
       .set('user-agent', TEST_AGENT)
-      .set('x-device-id', TEST_DEVICE)
-      .send({ email: 'org@test.com', password: 'password123' });
+      .set('x-device-id', orgDeviceId)
+      .send({
+        email: orgEmail,
+        password: 'password123',
+        fullName: 'Ivan Организатор',
+        role: 'organizer',
+      })
+      .expect(200);
 
-    accessToken = loginRes.body.accessToken;
+    accessToken = regRes.body.accessToken;
 
     const createEventRes = await request(app.getHttpServer())
       .post('/events')
       .set('Authorization', `Bearer ${accessToken}`)
       .set('user-agent', TEST_AGENT)
-      .set('x-device-id', TEST_DEVICE)
+      .set('x-device-id', orgDeviceId)
       .send({
         title: 'Race Condition Test',
-        description: 'Testing concurrency',
+        description: 'Testing concurrency logic',
         location: 'Test Location',
         maxParticipants: 5,
         category: 'other',
         startTime: new Date(Date.now() + 86400000).toISOString(),
         endTime: new Date(Date.now() + 96400000).toISOString(),
-      });
+      })
+      .expect(201);
 
     eventId = createEventRes.body.id;
   });
@@ -80,99 +84,116 @@ describe('Tickets (e2e)', () => {
 
   describe('Покупка билетов', () => {
     it('должен успешно купить билет и увеличить счетчик', async () => {
-      const email = `unique-${Date.now()}@test.com`;
-      const deviceId = 'f3bce883-2981-4faa-9f8f-465ef0214b09';
+      const userEmail = `user-${randomUUID()}@test.com`;
+      const userDeviceId = randomUUID();
 
-      await request(app.getHttpServer())
+      const regRes = await request(app.getHttpServer())
         .post('/auth/registration')
         .set('user-agent', TEST_AGENT)
-        .set('x-device-id', deviceId)
-        .send({ email, password: 'password123', fullName: 'New User', role: 'user' });
+        .set('x-device-id', userDeviceId)
+        .send({ email: userEmail, password: 'password123', fullName: 'New User', role: 'user' })
+        .expect(200);
 
-      const loginRes = await request(app.getHttpServer())
-        .post('/auth/login')
-        .set('user-agent', TEST_AGENT)
-        .set('x-device-id', deviceId)
-        .send({ email, password: 'password123' });
-
-      const token = loginRes.body.accessToken;
+      const token = regRes.body.accessToken;
 
       const res = await request(app.getHttpServer())
         .post(`/tickets/${eventId}`)
         .set('Authorization', `Bearer ${token}`)
         .set('user-agent', TEST_AGENT)
-        .set('x-device-id', deviceId);
+        .set('x-device-id', userDeviceId)
+        .expect(201);
 
-      if (res.status !== 201) console.log('Ошибка все еще тут:', res.body);
-      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty('id');
     });
 
     it('должен вернуть 400 при попытке купить второй билет тем же юзером', async () => {
+      const email = `double-ticket-${randomUUID()}@test.com`;
+      const deviceId = randomUUID();
+
+      const regRes = await request(app.getHttpServer())
+        .post('/auth/registration')
+        .set('user-agent', TEST_AGENT)
+        .set('x-device-id', deviceId)
+        .send({
+          email,
+          password: 'password123',
+          fullName: 'Double Buyer',
+          role: 'user',
+        })
+        .expect(200);
+
+      const userToken = regRes.body.accessToken;
+
       await request(app.getHttpServer())
         .post(`/tickets/${eventId}`)
-        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .set('user-agent', TEST_AGENT)
-        .set('x-device-id', TEST_DEVICE);
+        .set('x-device-id', deviceId)
+        .expect(201);
 
       const res = await request(app.getHttpServer())
         .post(`/tickets/${eventId}`)
-        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .set('user-agent', TEST_AGENT)
-        .set('x-device-id', TEST_DEVICE);
+        .set('x-device-id', deviceId);
 
       expect(res.status).toBe(400);
     });
-    it('RACE CONDITION: 6 запросов на 3 места (ПОБЕДНЫЙ)', async () => {
+
+    it('RACE CONDITION: 6 запросов на 3 места', async () => {
       const maxParticipants = 3;
       const requestsCount = 6;
 
       await dataSource.query(`UPDATE "events" SET "maxParticipants" = $1 WHERE "id" = $2`, [maxParticipants, eventId]);
+
       const clients: { token: string; deviceId: string }[] = [];
 
       for (let i = 0; i < requestsCount; i++) {
-        const email = `winner-user-${i}-${Date.now()}@test.com`;
+        const clientEmail = `race-user-${i}-${randomUUID()}@test.com`;
+        const clientDeviceId = randomUUID();
 
         const regRes = await request(app.getHttpServer())
           .post('/auth/registration')
           .set('user-agent', TEST_AGENT)
-          .set('X-Forwarded-For', `192.168.2.${i}`)
+          .set('x-device-id', clientDeviceId)
           .send({
-            email,
+            email: clientEmail,
             password: 'password123',
             fullName: `Winner ${i}`,
             role: 'user',
-          });
+          })
+          .expect(200);
 
         clients.push({
           token: regRes.body.accessToken,
-          deviceId: regRes.body.deviceId,
+          deviceId: clientDeviceId,
         });
       }
 
-      await new Promise((res) => setTimeout(res, 500));
+      await new Promise((res) => setTimeout(res, 200));
 
       const results = await Promise.all(
         clients.map((client, i) =>
           request(app.getHttpServer())
             .post(`/tickets/${eventId}`)
             .set('Authorization', `Bearer ${client.token}`)
-            .set('x-device-id', client.deviceId) // Передаем ТОТ ЖЕ девайс, что создал сервер
             .set('user-agent', TEST_AGENT)
-            .set('X-Forwarded-For', `192.168.2.${i}`),
+            .set('x-device-id', client.deviceId)
+            .set('X-Forwarded-For', `192.168.5.${i}`)
+            .send(),
         ),
       );
 
-      const statuses = results.map((r) => r.status);
-      console.log('Статусы финальной гонки:', statuses);
-
       const successes = results.filter((r) => r.status === 201);
       const failures = results.filter((r) => r.status === 400);
+
+      console.log('Результаты гонки:', successes.length, 'успехов,', failures.length, 'ошибок');
 
       expect(successes.length).toBe(maxParticipants);
       expect(failures.length).toBe(requestsCount - maxParticipants);
 
       const eventRes = await request(app.getHttpServer()).get(`/events/${eventId}`);
       expect(eventRes.body.currentParticipantsCount).toBe(maxParticipants);
-    }, 60000);
+    }, 30000);
   });
 });
