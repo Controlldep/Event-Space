@@ -33,10 +33,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   const config = new DocumentBuilder()
-    .setTitle('tickets example')
-    .setDescription('Create Event-Space')
-    .setVersion('0.3')
-    .addTag('tickets')
+    .setTitle('Event Space API')
+    .setDescription('The event-space API description')
+    .addBearerAuth()
+    .setVersion('1.0')
     .build();
   const options: SwaggerDocumentOptions = {
     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
