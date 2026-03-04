@@ -62,6 +62,6 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       await this.sessionService.updateSession(user.id, deviceId!, updateDto);
     }
 
-    return { accessToken: this.jwtService.createAccessToken(user.id, deviceId!), refreshToken, deviceId };
+    return { accessToken: await this.jwtService.createAccessToken(user.id, deviceId!), refreshToken, deviceId };
   }
 }

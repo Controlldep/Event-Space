@@ -27,6 +27,7 @@ import { RegisterUserUseCase } from './application/use-cases/auth/commands/regis
 import { RefreshSessionUseCase } from './application/use-cases/auth/commands/refresh-session-use-case';
 import { IdentificationGuard } from './guards/Identification.guard';
 import { GetProfileUseCase } from './application/use-cases/auth/query/get-profile-use-case';
+import { LogOutUseCase } from 'src/modules/users/application/use-cases/auth/commands/logout-use-case';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { GetProfileUseCase } from './application/use-cases/auth/query/get-profil
     UpdateUserUseCase,
     DeleteUserUseCase,
     GetProfileUseCase,
+    LogOutUseCase,
     IdentificationGuard,
     UserRepository,
     PasswordService,

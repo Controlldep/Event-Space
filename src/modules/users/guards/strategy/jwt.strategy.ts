@@ -5,10 +5,14 @@ import { SessionService } from '../../application/session.service';
 import { SessionEntity } from '../../domain/session.entity';
 import { CustomHttpException, DomainExceptionCode } from '../../../../core/exceptions/domain.exceptions';
 import { AccessTokenDto } from '../dto/access-token.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private readonly sessionService: SessionService) {
+  constructor(
+    private readonly sessionService: SessionService,
+    private redisService: RedisService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.JWT_SECRET!,
@@ -16,9 +20,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: AccessTokenDto) {
-    const findSession: SessionEntity | null = await this.sessionService.findSessionByDeviceIdAndUserId(payload.userId, payload.deviceId);
-    if (!findSession) throw new CustomHttpException(DomainExceptionCode.UNAUTHORIZED);
-
+    const findInRedis: string | null = await this.redisService.getJson(payload.deviceId);
+    if (!findInRedis) {
+      const findSession: SessionEntity | null = await this.sessionService.findSessionByDeviceIdAndUserId(payload.userId, payload.deviceId);
+      if (!findSession) throw new CustomHttpException(DomainExceptionCode.UNAUTHORIZED);
+    }
+    console.log(findInRedis);
     return { userId: payload.userId, deviceId: payload.deviceId };
   }
 }

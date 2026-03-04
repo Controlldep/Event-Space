@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { GetProfileQuery } from '../application/use-cases/auth/query/get-profile-use-case';
 import { UserEntity } from '../domain/user.entity';
 import { SessionEntity } from '../domain/session.entity';
+import { LogOutCommand } from 'src/modules/users/application/use-cases/auth/commands/logout-use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -102,7 +103,7 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   @Post('logout')
   async logOutHandler(@CurrentUser() user: ActiveUserData, @Res({ passthrough: true }) res: Response) {
-    await this.sessionService.deleteDeviceById(user.userId, user.deviceId);
+    await this.commandBus.execute(new LogOutCommand(user.userId, user.deviceId));
     res.clearCookie('refreshToken', { httpOnly: true, secure: true, sameSite: 'strict' });
   }
 

@@ -1,19 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class JwtService {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private redisService: RedisService,
+  ) {}
 
-  createAccessToken(userId: string, deviceId: string): string {
+  async createAccessToken(userId: string, deviceId: string): Promise<string> {
+    await this.redisService.set(deviceId, userId, this.configService.get('MAX_AGE_ACCESS_TOKEN_FOR_REDIS'));
     return jwt.sign({ userId, deviceId }, this.configService.get('JWT_SECRET')!, {
-      expiresIn: '10m',
+      expiresIn: this.configService.get('MAX_AGE_ACCESS_TOKEN'),
     });
   }
 
-  //TODO придумать как сделать через энв
   createRefreshToken(userId: string, deviceId: string): string {
-    return jwt.sign({ userId, deviceId }, this.configService.get('JWT_SECRET_REFRESH')!, { expiresIn: '20m' });
+    return jwt.sign(
+      {
+        userId,
+        deviceId,
+      },
+      this.configService.get('JWT_SECRET_REFRESH')!,
+      { expiresIn: this.configService.get('MAX_AGE_REFRESH_TOKEN') },
+    );
   }
 }
