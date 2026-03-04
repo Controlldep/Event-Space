@@ -4,28 +4,31 @@ import { EventsService } from '../application/events.service';
 import { type ActiveUserData, CurrentUser } from '../../../core/decorators/extract-user-from-request';
 import { JwtAuthGuard } from '../../users/guards/jwt-auth.guard';
 import { QueryEventDto } from './input-dto/query-event.dto';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateEventCommand } from '../application/use-case/command/create-event-use-case';
 import { UpdateEventCommand } from '../application/use-case/command/update-event-use-case';
 import { EventEntity } from '../domain/event.entity';
 import { DeleteResult } from 'typeorm';
 import { UpdateEventDto } from './input-dto/update-event.dto';
+import { GetAllEventsQuery } from 'src/modules/events/application/use-case/query/get-all-events-use-case';
+import { GetEventByIdQuery } from 'src/modules/events/application/use-case/query/get-event-by-id-use-case';
 
 @Controller('events')
 export class EventsController {
   constructor(
     private readonly eventsService: EventsService,
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
 
   @Get()
   async getAllEvents(@Query() dto: QueryEventDto) {
-    return await this.eventsService.getAllEvents(dto);
+    return await this.queryBus.execute(new GetAllEventsQuery(dto));
   }
 
   @Get(':id')
   async getEventById(@Param('id') id: string): Promise<EventEntity | null> {
-    return await this.eventsService.getEventById(id);
+    return await this.queryBus.execute(new GetEventByIdQuery(id));
   }
 
   @UseGuards(JwtAuthGuard)
