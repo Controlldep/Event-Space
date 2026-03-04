@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './modules/users/users.module';
@@ -8,6 +6,7 @@ import databaseConfig from './core/config/database.config';
 import { EventsModule } from './modules/events/events.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { envSchema } from './core/config/env.validation';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
@@ -32,8 +31,9 @@ import { envSchema } from './core/config/env.validation';
     UsersModule,
     EventsModule,
     TicketsModule,
+    RedisModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
