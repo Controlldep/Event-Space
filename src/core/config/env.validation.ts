@@ -11,12 +11,16 @@ export const envSchema = z.object({
 
   JWT_SECRET: z.string().min(3, 'Секрет JWT должен быть не менее 3 символов'),
   MAX_AGE_ACCESS_TOKEN: z.coerce.string(),
+  MAX_AGE_ACCESS_TOKEN_FOR_REDIS: z.coerce.number(),
 
   JWT_SECRET_REFRESH: z.string().min(5, 'Секрет REFRESH должен быть не менее 5 символов'),
   MAX_AGE_REFRESH_TOKEN: z.coerce.string(),
+  MAX_AGE_REFRESH_TOKEN_FOR_REDIS: z.coerce.number(),
 
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_DB: z.coerce.number(),
 
   STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
 
