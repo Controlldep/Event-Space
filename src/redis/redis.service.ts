@@ -14,6 +14,10 @@ export class RedisService {
     }
   }
 
+  async get(key: string): Promise<string | null> {
+    return await this.redis.get(key);
+  }
+
   async getJson<T>(key: string): Promise<T | null> {
     const data: string | null = await this.redis.get(key);
     if (!data) return null;
@@ -28,14 +32,5 @@ export class RedisService {
 
   async del(key: string): Promise<void> {
     await this.redis.del(key);
-  }
-
-  async hset(key: string, field: string, value: any): Promise<void> {
-    await this.redis.hset(key, field, JSON.stringify(value));
-  }
-
-  async hget(key: string, field: string): Promise<any | null> {
-    const data = await this.redis.hget(key, field);
-    return data ? JSON.parse(data) : null;
   }
 }

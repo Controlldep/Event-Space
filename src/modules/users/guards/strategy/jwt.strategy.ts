@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: AccessTokenDto) {
-    const findInRedis: string | null = await this.redisService.getJson(payload.deviceId);
+    const findInRedis: string | null = await this.redisService.get(payload.deviceId);
     if (!findInRedis) {
       const findSession: SessionEntity | null = await this.sessionService.findSessionByDeviceIdAndUserId(payload.userId, payload.deviceId);
       if (!findSession) throw new CustomHttpException(DomainExceptionCode.UNAUTHORIZED);
