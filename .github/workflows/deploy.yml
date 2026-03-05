@@ -31,6 +31,19 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      elasticsearch:
+        image: elasticsearch/elasticsearch:8.12.0
+        env:
+          discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          xpack.security.enabled: "false"
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -s http://localhost:9200/_cluster/health | grep -q 'status.*\(green\|yellow\)'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Get Code
         uses: actions/checkout@v4
