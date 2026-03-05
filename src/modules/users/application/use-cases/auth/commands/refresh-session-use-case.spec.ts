@@ -3,6 +3,7 @@ import { SessionService } from '../../../session.service';
 import { PasswordService } from '../../../password.service';
 import { JwtService } from '../../../jwt.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { RedisService } from 'src/redis/redis.service';
 
 describe('RefreshSessionUseCase', () => {
   let useCase: RefreshSessionUseCase;
@@ -26,6 +27,12 @@ describe('RefreshSessionUseCase', () => {
         {
           provide: PasswordService,
           useValue: { hashRefreshToken: jest.fn(() => 'new-hash') },
+        },
+        {
+          provide: RedisService,
+          useValue: {
+            del: jest.fn(),
+          },
         },
       ],
     }).compile();
