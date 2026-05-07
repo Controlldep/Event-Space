@@ -7,6 +7,7 @@ import { CustomHttpException, DomainExceptionCode } from './core/exceptions/doma
 import cookieParser from 'cookie-parser';
 import { CustomExceptionFilter } from './core/exceptions/exceptionts-filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
+import { LoggerService } from '@app/logger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -41,6 +42,9 @@ async function bootstrap() {
   const options: SwaggerDocumentOptions = {
     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
   };
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
 
   const documentFactory = () => SwaggerModule.createDocument(app, config, options);
   SwaggerModule.setup('api', app, documentFactory);

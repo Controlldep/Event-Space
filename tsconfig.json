@@ -21,11 +21,18 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "@app/common": ["libs/common/src/index.ts"],
+      "@app/common/*": ["libs/common/src/*"],
+      "@apps/src/*": ["apps/src/*"],
+      "@app/logger": ["libs/logger/src"],
+      "@app/logger/*": ["libs/logger/src/*"],
     }
   },
   "include": [
     "src/**/*",
+    "libs/**/*",
+    "apps/**/*",
     "test/**/*"
   ],
   "exclude": [
