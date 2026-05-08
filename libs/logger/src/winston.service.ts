@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import winston from 'winston';
+import { REQUEST_ID_KEY } from '@app/logger/middleware';
+import { AsyncLocalStorageService } from '@app/logger/async-local-storage';
 
 @Injectable()
 export class WinstonService {
   private logger: winston.Logger;
   private context: string = 'App';
 
-  constructor() {
+  constructor(private readonly asyncLocalStorageService: AsyncLocalStorageService) {
     this.logger = winston.createLogger({
       level: 'info',
       format: winston.format.combine(
@@ -26,7 +28,13 @@ export class WinstonService {
   }
 
   log(message: string, context?: string) {
-    this.logger.info(message, { context: context || this.context });
+    const store = this.asyncLocalStorageService.getStore();
+    const requestId = store?.get(REQUEST_ID_KEY);
+
+    this.logger.info(message, {
+      context: context || this.context,
+      requestId: requestId,
+    });
   }
 
   error(message: string, stack?: string) {
