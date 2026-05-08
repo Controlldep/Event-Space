@@ -1,20 +1,28 @@
-# 1. Используем стабильную ноду
-FROM node:20-alpine
+# STAGE 1: Build
+FROM node:20-alpine AS builder
 
-# 2. Создаем рабочую директорию
 WORKDIR /usr/src/app
 
-# 3. Копируем файлы зависимостей
-COPY package*.json ./
+COPY package*.json yarn.lock ./
 
-# 4. Устанавливаем зависимости
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
-# 5. Копируем весь исходный код
 COPY . .
 
-# 7. Открываем порт
+RUN yarn build
+
+# STAGE 2: Development
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/yarn.lock ./
+
+RUN yarn install --production --frozen-lockfile
+
+COPY --from=builder /usr/src/app/dist ./dist
+
 EXPOSE 3000
 
-# 8. Запускаем в режиме разработки (или production)
-CMD ["yarn", "run", "start:dev"]
+CMD ["node", "dist/main.js"]
