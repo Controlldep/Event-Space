@@ -1,16 +1,16 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DataSource } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../src/app.module';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
-import { CustomHttpException, DomainExceptionCode } from '../../../src/core/exceptions/domain.exceptions';
-import { CustomExceptionFilter } from '../../../src/core/exceptions/exceptionts-filter';
-import { LoggingInterceptor } from '../../../src/core/interceptors/logging.interceptor';
 import { cleanDatabase } from '../../helpers/db-cleaner';
 import request from 'supertest';
-import { EventEntity } from '../../../src/modules/events/domain/event.entity';
 import { randomUUID } from 'crypto';
+import { AppModule } from '../../../apps/events/src/app.module';
+import { CustomHttpException, DomainExceptionCode } from '../../../apps/events/src/core/exceptions/domain.exceptions';
+import { CustomExceptionFilter } from '../../../apps/events/src/core/exceptions/exceptionts-filter';
+import { LoggingInterceptor } from '../../../apps/events/src/core/interceptors/logging.interceptor';
+import { EventEntity } from '../../../apps/events/src/modules/events/domain/event.entity';
 
 describe('Events (e2e)', () => {
   let app: NestExpressApplication;

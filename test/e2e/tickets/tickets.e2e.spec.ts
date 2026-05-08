@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../src/app.module';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import { DataSource } from 'typeorm';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { CustomHttpException, DomainExceptionCode } from '../../../src/core/exceptions/domain.exceptions';
-import { CustomExceptionFilter } from '../../../src/core/exceptions/exceptionts-filter';
 import { cleanDatabase } from '../../helpers/db-cleaner';
 import { randomUUID } from 'crypto';
+import { AppModule } from '../../../apps/events/src/app.module';
+import { CustomHttpException, DomainExceptionCode } from '../../../apps/events/src/core/exceptions/domain.exceptions';
+import { CustomExceptionFilter } from '../../../apps/events/src/core/exceptions/exceptionts-filter';
 
 const TEST_AGENT = 'TestAgent/1.0';
 

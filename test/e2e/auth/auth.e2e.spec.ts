@@ -2,17 +2,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { cleanDatabase } from '../../helpers/db-cleaner';
 import request from 'supertest';
-import { AppModule } from '../../../src/app.module';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomExceptionFilter } from '../../../src/core/exceptions/exceptionts-filter';
-import { LoggingInterceptor } from '../../../src/core/interceptors/logging.interceptor';
-import { CustomHttpException, DomainExceptionCode } from '../../../src/core/exceptions/domain.exceptions';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
-import { UserRole } from '../../../src/modules/users/domain/enum/user-role.type';
-import { UserEntity } from '../../../src/modules/users/domain/user.entity';
-import { SessionEntity } from '../../../src/modules/users/domain/session.entity';
 import { randomUUID } from 'crypto';
+import { AppModule } from '../../../apps/events/src/app.module';
+import { CustomHttpException, DomainExceptionCode } from '../../../apps/events/src/core/exceptions/domain.exceptions';
+import { CustomExceptionFilter } from '../../../apps/events/src/core/exceptions/exceptionts-filter';
+import { LoggingInterceptor } from '../../../apps/events/src/core/interceptors/logging.interceptor';
+import { UserRole } from '../../../apps/events/src/modules/users/domain/enum/user-role.type';
+import { UserEntity } from '../../../apps/events/src/modules/users/domain/user.entity';
+import { SessionEntity } from '../../../apps/events/src/modules/users/domain/session.entity';
 
 describe('Auth (e2e)', () => {
   let app: NestExpressApplication;
