@@ -10,9 +10,12 @@ import { envSchema } from './core/config/env.validation';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule, RequestContextMiddleware } from '@app/logger';
 import { RedisModule } from './redis/redis.module';
+import { MetricsModule } from '../../../libs/metrics/src/module';
+import { OutboxModule } from 'src/modules/outbox/outbox.module';
 
 @Module({
   imports: [
+    MetricsModule,
     LoggerModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
@@ -33,6 +36,7 @@ import { RedisModule } from './redis/redis.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => configService.get<TypeOrmModuleOptions>('database')!,
     }),
+    OutboxModule,
     UsersModule,
     EventsModule,
     TicketsModule,
