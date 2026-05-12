@@ -21,15 +21,13 @@ export class WinstonService {
         new winston.transports.Console({
           format: winston.format.colorize({ all: true }),
         }),
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'combined.log' }),
       ],
     });
   }
 
   log(message: string, context?: string) {
     const store = this.asyncLocalStorageService.getStore();
-    const requestId = store?.get(REQUEST_ID_KEY);
+    const requestId: string = store?.get(REQUEST_ID_KEY);
 
     this.logger.info(message, {
       context: context || this.context,
