@@ -1,0 +1,11 @@
+groups:
+  - name: nodejs_alerts
+    rules:
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 10
+        for: 10s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Взлет RAM на бэкенде"
+          description: "Использование памяти превысило 400МБ на инстансе {{ $labels.instance }}"
