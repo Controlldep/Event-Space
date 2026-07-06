@@ -1,3 +1,7 @@
+import { otelSDK } from './tracer';
+otelSDK.start();
+console.log('--- ФАЙЛ TRACER.TS ЗАГРУЖЕН И ВЫПОЛНЯЕТСЯ ---');
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger';

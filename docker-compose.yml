@@ -33,6 +33,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/usr/src/app
+      - /usr/src/app/dist
   db:
     image: postgres:15
     container_name: event_db_container
@@ -158,7 +159,9 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     networks:
-      - app-network
+      app-network:
+        aliases:
+          - jaeger
   promtail:
     image: grafana/promtail:latest
     user: root
