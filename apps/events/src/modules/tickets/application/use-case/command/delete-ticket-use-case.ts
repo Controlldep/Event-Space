@@ -1,9 +1,9 @@
 import { DataSource, QueryRunner } from 'typeorm';
-import type { ActiveUserData } from '../../../../../core/decorators/extract-user-from-request';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TicketEntity } from '../../../domain/ticket.entity';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
 import { EventEntity } from '../../../../events/domain/event.entity';
+import { ActiveUserData } from '@app/decorators/extract-user-from-request';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
 
 export class DeleteTicketCommand {
   constructor(
