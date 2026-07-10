@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "target": "ES2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -10,10 +10,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "rootDir": ".",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -22,21 +22,17 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "src/*": ["apps/events/src/*"],
-      "@app/common": ["libs/common/src/index.ts"],
+      "@app/common": ["libs/common/src"],
       "@app/common/*": ["libs/common/src/*"],
       "@app/logger": ["libs/logger/src"],
-      "@app/logger/*": ["libs/logger/src/*"]
+      "@app/logger/*": ["libs/logger/src/*"],
+      "@app/exceptions": ["libs/exceptions/src"],
+      "@app/exceptions/*": ["libs/exceptions/src/*"],
+      "@app/redis": ["libs/redis/src"],
+      "@app/redis/*": ["libs/redis/src/*"],
+      "@app/decorators": ["libs/decorators/src"],
+      "@app/decorators/*": ["libs/decorators/src/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "libs/**/*",
-    "apps/**/*",
-    "test/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["libs/**/*", "apps/**/*"]
 }

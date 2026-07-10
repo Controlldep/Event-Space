@@ -30,7 +30,11 @@
     "auth": {
       "type": "application",
       "root": "apps/auth",
-      "sourceRoot": "apps/auth/src"
+      "entryFile": "main",
+      "sourceRoot": "apps/auth/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/auth/tsconfig.app.json"
+      }
     },
     "logger": {
       "type": "library",
