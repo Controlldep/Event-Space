@@ -1,8 +1,8 @@
-import { BaseQueryParams } from '../../../../../core/dto/base.query.params';
-import { TicketEntity } from '../../../domain/ticket.entity';
+import { TicketEntity } from '../../domain/ticket.entity';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { BaseQueryParams } from '../../../../core/dto/base.query.params';
 
 export class GetMyTicketsQuery {
   constructor(

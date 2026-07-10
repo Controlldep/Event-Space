@@ -1,11 +1,9 @@
 import { DataSource, QueryRunner } from 'typeorm';
 import { TicketEntity } from '../../../domain/ticket.entity';
-import type { ActiveUserData } from '../../../../../core/decorators/extract-user-from-request';
+import { ActiveUserData } from '@app/decorators/extract-user-from-request';
 import { EventEntity } from '../../../../events/domain/event.entity';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { OutboxEntity, OutboxStatus } from '../../../../outbox/outbox.entity';
-import { OutboxEventType } from '@app/common';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
 
 export class CreateTicketsCommand {
   constructor(
@@ -56,16 +54,6 @@ export class CreateTicketsUseCase implements ICommandHandler<CreateTicketsComman
 
       findEvent.currentParticipantsCount++;
       await queryRunner.manager.save(findEvent);
-
-      await queryRunner.manager.save(OutboxEntity, {
-        type: OutboxEventType.TICKET_PURCHASED,
-        payload: {
-          eventName: findEvent.title,
-          startTime: findEvent.startTime,
-          endTime: findEvent.endTime,
-        },
-        status: OutboxStatus.PENDING,
-      });
 
       await queryRunner.commitTransaction();
       return ticket;

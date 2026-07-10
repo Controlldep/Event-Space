@@ -1,5 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import type { UserEntity } from '../../users/domain/user.entity';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { CreateEventDto } from '../api/input-dto/create-event.dto';
 import { EventCategory } from './enum/event-category';
@@ -44,10 +43,6 @@ export class EventEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToOne('UserEntity', (user: UserEntity) => user.events)
-  @JoinColumn({ name: 'organizerId' })
-  user: UserEntity;
 
   @OneToMany('TicketEntity', (ticket: TicketEntity) => ticket.event)
   tickets: TicketEntity[];

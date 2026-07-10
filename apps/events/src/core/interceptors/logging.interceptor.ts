@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, HttpStatus, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { catchError, Observable, tap, throwError } from 'rxjs';
-import { CustomHttpException, DomainExceptionCode } from '../exceptions/domain.exceptions';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

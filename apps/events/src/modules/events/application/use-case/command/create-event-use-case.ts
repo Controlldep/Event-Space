@@ -1,12 +1,11 @@
 import { DataSource, LessThan, MoreThan, QueryRunner } from 'typeorm';
-import type { ActiveUserData } from '../../../../../core/decorators/extract-user-from-request';
 import { CreateEventDto } from '../../../api/input-dto/create-event.dto';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
-import { UserEntity } from '../../../../users/domain/user.entity';
-import { UserRole } from '../../../../users/domain/enum/user-role.type';
 import { EventEntity } from '../../../domain/event.entity';
 import { TicketEntity } from '../../../../tickets/domain/ticket.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
+import { ActiveUserData } from '@app/decorators/extract-user-from-request';
+import { UserRole } from '../../../../../../../auth/src/domain/enum/user-role.type';
 
 export class CreateEventCommand {
   constructor(
@@ -34,12 +33,7 @@ export class CreateEventUseCase implements ICommandHandler<CreateEventCommand> {
     await queryRunner.startTransaction();
 
     try {
-      const findUser: UserEntity | null = await queryRunner.manager.findOne(UserEntity, {
-        where: { id: userData.userId },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!findUser) throw new CustomHttpException(DomainExceptionCode.NOT_FOUND, 'Пользователь не найден');
-      if (findUser.role !== UserRole.ORGANIZER) {
+      if (userData.role !== UserRole.ORGANIZER) {
         throw new CustomHttpException(DomainExceptionCode.BAD_REQUEST, 'Вы не являетесь организатором');
       }
 
@@ -48,7 +42,7 @@ export class CreateEventUseCase implements ICommandHandler<CreateEventCommand> {
 
       const otherEvents: EventEntity[] = await queryRunner.manager.find(EventEntity, {
         where: {
-          organizerId: findUser.id,
+          organizerId: userData.userId,
           endTime: MoreThan(bufferStart),
           startTime: LessThan(bufferEnd),
         },
@@ -65,7 +59,7 @@ export class CreateEventUseCase implements ICommandHandler<CreateEventCommand> {
         }
       }
 
-      const eventInstance: EventEntity = EventEntity.createInstance(dto, findUser.id);
+      const eventInstance: EventEntity = EventEntity.createInstance(dto, userData.userId);
       const savedEvent: EventEntity = await queryRunner.manager.save(eventInstance);
 
       const organizerTicket: TicketEntity = TicketEntity.createInstance({

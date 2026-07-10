@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateEventCommand, UpdateEventUseCase } from './update-event-use-case';
 import { DataSource } from 'typeorm';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
+import { CustomHttpException, DomainExceptionCode } from '../../../../../../../../libs/exceptions/src/domain.exceptions';
 
 describe('UpdateEventUseCase', () => {
   let useCase: UpdateEventUseCase;

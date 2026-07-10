@@ -7,9 +7,9 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
-import { CustomHttpException, DomainExceptionCode } from './core/exceptions/domain.exceptions';
+import { CustomHttpException, DomainExceptionCode } from '../../../libs/exceptions/src/domain.exceptions';
 import cookieParser from 'cookie-parser';
-import { CustomExceptionFilter } from './core/exceptions/exceptionts-filter';
+import { CustomExceptionFilter } from '../../../libs/exceptions/src/exceptionts-filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { LoggerService } from '@app/logger';
 

@@ -1,16 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/apps/events",
-    "baseUrl": "./",
-    "rootDir": "../../",
-    "paths": {
-      "src/*": ["./src/*"],
-      "@app/common": ["../../libs/common/src/index.ts"],
-      "@app/common/*": ["../../libs/common/src/*"],
-      "@app/logger": ["../../libs/logger/src/index.ts"],
-      "@app/logger/*": ["../../libs/logger/src/*"]
-    }
+    "outDir": "../../dist/apps/events"
   },
-  "include": ["src/**/*", "../../libs/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }

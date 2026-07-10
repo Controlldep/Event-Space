@@ -2,16 +2,14 @@ import { join } from 'path';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { UsersModule } from './modules/users/users.module';
 import databaseConfig from './core/config/database.config';
 import { EventsModule } from './modules/events/events.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { envSchema } from './core/config/env.validation';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule, RequestContextMiddleware } from '@app/logger';
-import { RedisModule } from './redis/redis.module';
 import { MetricsModule } from '../../../libs/metrics/src/module';
-import { OutboxModule } from 'src/modules/outbox/outbox.module';
+import { RedisModule } from '@app/redis/redis.module';
 
 @Module({
   imports: [
@@ -36,8 +34,6 @@ import { OutboxModule } from 'src/modules/outbox/outbox.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => configService.get<TypeOrmModuleOptions>('database')!,
     }),
-    OutboxModule,
-    UsersModule,
     EventsModule,
     TicketsModule,
     RedisModule,

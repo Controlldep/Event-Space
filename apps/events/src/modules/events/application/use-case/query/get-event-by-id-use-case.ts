@@ -1,8 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { EventsRepository } from '../../../infrastructure/events.repository';
-import { RedisService } from '../../../../../redis/redis.service';
 import { EventEntity } from '../../../domain/event.entity';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
+import { RedisService } from '@app/redis/redis.service';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
 
 export class GetEventByIdQuery {
   constructor(public readonly id: string) {}

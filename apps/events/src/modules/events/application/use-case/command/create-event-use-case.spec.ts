@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { CreateEventCommand, CreateEventUseCase } from './create-event-use-case';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserRole } from '../../../../users/domain/enum/user-role.type';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
+import { CustomHttpException, DomainExceptionCode } from '../../../../../../../../libs/exceptions/src/domain.exceptions';
 
 describe('CreateEventUseCase', () => {
   let useCase: CreateEventUseCase;

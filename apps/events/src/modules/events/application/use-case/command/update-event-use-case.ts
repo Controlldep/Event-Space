@@ -1,10 +1,9 @@
 import { DataSource, LessThan, MoreThan, Not, QueryRunner } from 'typeorm';
-import type { ActiveUserData } from '../../../../../core/decorators/extract-user-from-request';
-import { CustomHttpException, DomainExceptionCode } from '../../../../../core/exceptions/domain.exceptions';
-import { UserEntity } from '../../../../users/domain/user.entity';
 import { EventEntity } from '../../../domain/event.entity';
 import { UpdateEventDto } from '../../../api/input-dto/update-event.dto';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
+import { ActiveUserData } from '@app/decorators/extract-user-from-request';
 
 export class UpdateEventCommand {
   constructor(
@@ -32,11 +31,7 @@ export class UpdateEventUseCase implements ICommandHandler<UpdateEventCommand> {
 
       if (!event) throw new CustomHttpException(DomainExceptionCode.NOT_FOUND);
       if (event.organizerId !== userData.userId) throw new CustomHttpException(DomainExceptionCode.FORBIDDEN);
-
-      await queryRunner.manager.findOne(UserEntity, {
-        where: { id: event.organizerId },
-      });
-
+      //TODO: Implement Saga
       if (dto.maxParticipants !== undefined && dto.maxParticipants < event.maxParticipants) {
         if (dto.maxParticipants < event.currentParticipantsCount) {
           throw new CustomHttpException(

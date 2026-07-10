@@ -7,8 +7,8 @@ import { cleanDatabase } from '../../helpers/db-cleaner';
 import request from 'supertest';
 import { randomUUID } from 'crypto';
 import { AppModule } from '../../../apps/events/src/app.module';
-import { CustomHttpException, DomainExceptionCode } from '../../../apps/events/src/core/exceptions/domain.exceptions';
-import { CustomExceptionFilter } from '../../../apps/events/src/core/exceptions/exceptionts-filter';
+import { CustomHttpException, DomainExceptionCode } from '../../../libs/exceptions/src/domain.exceptions';
+import { CustomExceptionFilter } from '../../../libs/exceptions/src/exceptionts-filter';
 import { LoggingInterceptor } from '../../../apps/events/src/core/interceptors/logging.interceptor';
 import { EventEntity } from '../../../apps/events/src/modules/events/domain/event.entity';
 
