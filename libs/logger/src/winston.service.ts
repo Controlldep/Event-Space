@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import winston from 'winston';
-import { REQUEST_ID_KEY } from '@app/logger/middleware';
-import { AsyncLocalStorageService } from '@app/logger/async-local-storage';
+import { REQUEST_ID_KEY } from './middleware';
+import { AsyncLocalStorageService } from './async-local-storage';
 
 @Injectable()
 export class WinstonService {
