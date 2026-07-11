@@ -31,8 +31,10 @@
       "@app/redis": ["libs/redis/src"],
       "@app/redis/*": ["libs/redis/src/*"],
       "@app/decorators": ["libs/decorators/src"],
-      "@app/decorators/*": ["libs/decorators/src/*"]
+      "@app/decorators/*": ["libs/decorators/src/*"],
+      "@app/guards": ["libs/guards/src"],
+      "@app/guards/*": ["libs/guards/src/*"]
     }
   },
-  "include": ["libs/**/*", "apps/**/*"]
+  "include": ["libs/**/*", "apps/**/*", "test"]
 }
