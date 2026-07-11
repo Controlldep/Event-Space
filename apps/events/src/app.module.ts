@@ -10,6 +10,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule, RequestContextMiddleware } from '@app/logger';
 import { MetricsModule } from '../../../libs/metrics/src/module';
 import { RedisModule } from '@app/redis/redis.module';
+import { USER_VERIFIER } from '@app/guards/user-verifier.token';
+import { HttpUserVerifier } from './modules/tickets/application/http-user-verifier.service';
 
 @Module({
   imports: [
@@ -39,7 +41,7 @@ import { RedisModule } from '@app/redis/redis.module';
     RedisModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{ provide: USER_VERIFIER, useClass: HttpUserVerifier }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

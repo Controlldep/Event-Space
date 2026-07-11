@@ -11,9 +11,7 @@ import { AuthController } from './api/auth.controller';
 import { SessionService } from './application/session.service';
 import { JwtService } from './application/jwt.service';
 import { SessionRepository } from './infrastructure/session.repository';
-import { JwtStrategy } from './guards/strategy/jwt.strategy';
 import { RefreshStrategy } from './guards/strategy/refresh.strategy';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { CreateUserUseCase } from './application/use-cases/account/commands/create-user-use-case';
 import { UpdateUserUseCase } from './application/use-cases/account/commands/update-user-use-case';
@@ -28,6 +26,11 @@ import { RefreshSessionUseCase } from './application/use-cases/auth/commands/ref
 import { IdentificationGuard } from './guards/Identification.guard';
 import { GetProfileUseCase } from './application/use-cases/auth/query/get-profile-use-case';
 import { LogOutUseCase } from './application/use-cases/auth/commands/logout-use-case';
+import { DbUserVerifier } from './application/user-verify.service';
+import { USER_VERIFIER } from '@app/guards/user-verifier.token';
+import { JwtStrategy } from '@app/guards/strategy/jwt.strategy';
+import { JwtAuthGuard } from '@app/guards/jwt-auth.guard';
+import { InternalAuthController } from './api/internal-auth.controller';
 
 @Module({
   imports: [
@@ -45,13 +48,16 @@ import { LogOutUseCase } from './application/use-cases/auth/commands/logout-use-
     }),
   ],
   controllers: [UsersController, AuthController],
+
   providers: [
+    { provide: USER_VERIFIER, useClass: DbUserVerifier },
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
     GetProfileUseCase,
     LogOutUseCase,
     IdentificationGuard,
+    InternalAuthController,
     UserRepository,
     PasswordService,
     SessionService,

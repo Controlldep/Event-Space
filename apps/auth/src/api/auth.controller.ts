@@ -13,7 +13,7 @@ import { RefreshSessionCommand } from '../application/use-cases/auth/commands/re
 import { IdentificationGuard } from '../guards/Identification.guard';
 import ms, { StringValue } from 'ms';
 import { ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../libs/guards/src/jwt-auth.guard';
 import { GetProfileQuery } from '../application/use-cases/auth/query/get-profile-use-case';
 import { UserEntity } from '../domain/user.entity';
 import { SessionEntity } from '../domain/session.entity';
