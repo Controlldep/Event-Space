@@ -47,7 +47,7 @@ import { InternalAuthController } from './api/internal-auth.controller';
       ],
     }),
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, InternalAuthController],
 
   providers: [
     { provide: USER_VERIFIER, useClass: DbUserVerifier },
@@ -57,7 +57,6 @@ import { InternalAuthController } from './api/internal-auth.controller';
     GetProfileUseCase,
     LogOutUseCase,
     IdentificationGuard,
-    InternalAuthController,
     UserRepository,
     PasswordService,
     SessionService,
