@@ -13,7 +13,6 @@ import { RefreshSessionCommand } from '../application/use-cases/auth/commands/re
 import { IdentificationGuard } from '../guards/Identification.guard';
 import ms, { StringValue } from 'ms';
 import { ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from '../../../../libs/guards/src/jwt-auth.guard';
 import { GetProfileQuery } from '../application/use-cases/auth/query/get-profile-use-case';
 import { UserEntity } from '../domain/user.entity';
 import { SessionEntity } from '../domain/session.entity';
@@ -22,6 +21,7 @@ import { type ActiveUserData, CurrentUser } from '@app/decorators/extract-user-f
 import { GetUserIp } from '../core/decorators/get-user-ip';
 import { GetUserAgent } from '../core/decorators/get-user-agent';
 import { GetUserDeviceId } from '../core/decorators/get-user-device-id';
+import { JwtAuthGuard } from '@app/guards';
 
 @Controller('auth')
 export class AuthController {
@@ -86,7 +86,7 @@ export class AuthController {
       accessToken,
       refreshToken,
       deviceId: newDeviceId,
-    } = await this.commandBus.execute(new RefreshSessionCommand(user.userId, user.deviceId));
+    } = await this.commandBus.execute(new RefreshSessionCommand(user.userId, user.deviceId, user.role));
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,

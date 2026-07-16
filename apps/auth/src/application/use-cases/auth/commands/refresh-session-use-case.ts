@@ -8,6 +8,7 @@ export class RefreshSessionCommand {
   constructor(
     public readonly userId: string,
     public readonly deviceId: string,
+    public readonly role: string,
   ) {}
 }
 
@@ -20,11 +21,11 @@ export class RefreshSessionUseCase implements ICommandHandler<RefreshSessionComm
   ) {}
 
   async execute(command: RefreshSessionCommand) {
-    const { userId, deviceId } = command;
+    const { userId, deviceId, role } = command;
 
     await this.redisService.del(deviceId);
 
-    const accessToken: string = await this.jwtService.createAccessToken(userId, deviceId);
+    const accessToken: string = await this.jwtService.createAccessToken(userId, deviceId, role);
     const refreshToken: string = this.jwtService.createRefreshToken(userId, deviceId);
     const decoded = jwt.decode(refreshToken) as { exp: number };
 
