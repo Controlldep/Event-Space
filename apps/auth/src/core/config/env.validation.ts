@@ -3,11 +3,11 @@ import { z } from 'zod';
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
-  DB_PORT: z.coerce.number().default(5432),
-  DB_USERNAME: z.string(),
-  DB_HOST: z.string().default('localhost'),
-  DB_PASSWORD: z.string().min(5),
-  DB_DATABASE: z.string(),
+  AUTH_DB_PORT: z.coerce.number().default(5432),
+  AUTH_DB_USER: z.string(),
+  AUTH_DB_HOST: z.string().default('localhost'),
+  AUTH_DB_PASSWORD: z.string().min(5),
+  AUTH_DB_NAME: z.string(),
 
   JWT_SECRET: z.string().min(3, 'Секрет JWT должен быть не менее 3 символов'),
   MAX_AGE_ACCESS_TOKEN: z.coerce.string(),
