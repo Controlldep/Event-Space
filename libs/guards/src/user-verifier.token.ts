@@ -1,1 +1,1 @@
-export const USER_VERIFIER = Symbol('USER_VERIFIER');
+export const USER_VERIFIER = 'USER_VERIFIER';
