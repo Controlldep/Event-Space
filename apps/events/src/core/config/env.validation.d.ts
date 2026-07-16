@@ -5,11 +5,11 @@ export declare const envSchema: z.ZodObject<{
         production: "production";
         test: "test";
     }>>;
-    DB_PORT: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
-    DB_USERNAME: z.ZodString;
-    DB_HOST: z.ZodDefault<z.ZodString>;
-    DB_PASSWORD: z.ZodString;
-    DB_DATABASE: z.ZodString;
+    EVENTS_DB_PORT: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
+    EVENTS_DB_USER: z.ZodString;
+    EVENTS_DB_HOST: z.ZodDefault<z.ZodString>;
+    EVENTS_DB_PASSWORD: z.ZodString;
+    EVENTS_DB_NAME: z.ZodString;
     JWT_SECRET: z.ZodString;
     MAX_AGE_ACCESS_TOKEN: z.ZodCoercedString<unknown>;
     MAX_AGE_ACCESS_TOKEN_FOR_REDIS: z.ZodCoercedNumber<unknown>;
