@@ -5,9 +5,13 @@ rule_files:
   - "prometheus_rules.yml"
 
 scrape_configs:
-  - job_name: 'nestjs-app'
+  - job_name: 'events-service'
     static_configs:
-      - targets: [ 'backend:3000' ]
+        - targets: [ 'events:3000' ]
+
+  - job_name: 'auth-service'
+    static_configs:
+        - targets: [ 'auth:3001' ]
 
   - job_name: 'node-exporter'
     static_configs:

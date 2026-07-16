@@ -11,15 +11,18 @@ services:
     networks:
       - app-network
     depends_on:
-      - backend
+      - events
+      - auth
     restart: always
 
-  backend:
+  events:
     image: event-space
-    build: .
+    build:
+      context: .
+      dockerfile: ./apps/events/Dockerfile
     container_name: event_api_container
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
     env_file:
       - env/.env.development
     networks:
@@ -32,8 +35,30 @@ services:
       rabbitmq:
         condition: service_healthy
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/dist
+      - .:/usr/src/app/events
+      - /usr/src/app/events/dist
+  auth:
+    image: auth-space
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+    container_name: auth_api_container
+    ports:
+      - "3001:3001"
+    env_file:
+      - env/.env.development
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app/auth
+      - /usr/src/app/auth/dist
   db:
     image: postgres:15
     container_name: event_db_container
@@ -43,11 +68,11 @@ services:
     env_file:
       - env/.env.development
     environment:
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_DATABASE}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: event_space
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d event_space" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,6 +80,7 @@ services:
       - app-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
   redis:
     image: redis:7-alpine
     container_name: event_redis_container
@@ -96,7 +122,8 @@ services:
     networks:
       - app-network
     depends_on:
-      - backend
+      - events
+      - auth
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
