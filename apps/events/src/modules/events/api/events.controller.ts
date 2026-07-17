@@ -11,6 +11,7 @@ import { UpdateEventDto } from './input-dto/update-event.dto';
 import { GetAllEventsQuery } from '../application/use-case/query/get-all-events-use-case';
 import { GetEventByIdQuery } from '../application/use-case/query/get-event-by-id-use-case';
 import { type ActiveUserData, CurrentUser } from '@app/decorators/extract-user-from-request';
+import { PurchaseTicketCommand } from '../../tickets/application/use-case/command/purchase-ticket-use-case';
 
 @Controller('events')
 export class EventsController {
@@ -43,5 +44,10 @@ export class EventsController {
   @Delete(':id')
   async deleteEvent(@Param('id') id: string): Promise<DeleteResult> {
     return await this.eventsService.deleteEvent(id);
+  }
+
+  @Post('purchase/:eventId')
+  async purchaseTicket(@CurrentUser() user: ActiveUserData, @Param('eventId') eventId: string): Promise<{ redirectUrl: string }> {
+    return await this.commandBus.execute(new PurchaseTicketCommand(user, eventId));
   }
 }

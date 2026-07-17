@@ -4,19 +4,28 @@ import { ActiveUserData } from '@app/decorators/extract-user-from-request';
 import { EventEntity } from '../../../../events/domain/event.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { LoggerService } from '@app/logger';
 
-export class CreateTicketsCommand {
+export class PurchaseTicketCommand {
   constructor(
     public readonly user: ActiveUserData,
     public readonly eventId: string,
   ) {}
 }
 
-@CommandHandler(CreateTicketsCommand)
-export class CreateTicketsUseCase implements ICommandHandler<CreateTicketsCommand> {
-  constructor(private readonly dataSource: DataSource) {}
+@CommandHandler(PurchaseTicketCommand)
+export class PurchaseTicketUseCase implements ICommandHandler<PurchaseTicketCommand> {
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly httpService: HttpService,
+    private readonly logger: LoggerService,
+  ) {
+    this.logger.setContext(PurchaseTicketUseCase.name);
+  }
 
-  async execute(command: CreateTicketsCommand): Promise<TicketEntity> {
+  async execute(command: PurchaseTicketCommand): Promise<{ redirectUrl: string }> {
     const { user, eventId } = command;
 
     const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
@@ -56,7 +65,22 @@ export class CreateTicketsUseCase implements ICommandHandler<CreateTicketsComman
       await queryRunner.manager.save(findEvent);
 
       await queryRunner.commitTransaction();
-      return ticket;
+
+      try {
+        const paymentResponse = await firstValueFrom(
+          this.httpService.post('http://payments:3002/create-checkout-session', {
+            userId: user.userId,
+            eventId: eventId,
+            amount: findEvent.price,
+          }),
+        );
+        return { redirectUrl: paymentResponse.data.redirectUrl };
+      } catch (err) {
+        this.logger.error(err);
+        await queryRunner.manager.delete(TicketEntity, { id: ticket.id });
+
+        throw new CustomHttpException(DomainExceptionCode.INTERNAL_SERVER_ERROR, 'Платежный сервис недоступен');
+      }
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
