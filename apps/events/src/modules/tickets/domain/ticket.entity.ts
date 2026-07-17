@@ -5,7 +5,6 @@ import { CreateTicketDto } from './input-dto/create-ticket.dto';
 export enum TicketStatus {
   RESERVED = 'reserved',
   PURCHASED = 'purchased',
-  CANCELLED = 'cancelled',
 }
 
 @Entity('tickets')
@@ -38,6 +37,7 @@ export class TicketEntity {
   static createInstance(dto: CreateTicketDto): TicketEntity {
     const ticket: TicketEntity = new this();
     ticket.userId = dto.userId;
+    ticket.status = TicketStatus.RESERVED;
     ticket.reservedAt = new Date();
     ticket.eventId = dto.eventId;
 
