@@ -38,6 +38,9 @@ export class EventEntity {
   @Column('uuid')
   organizerId: string;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -58,6 +61,7 @@ export class EventEntity {
     event.location = dto.location;
     event.category = dto.category;
     event.currentParticipantsCount = 0;
+    event.price = dto.price;
 
     return event;
   }

@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsInt, IsNotEmpty, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsDate, IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EventCategory } from '../../domain/enum/event-category';
 
@@ -33,4 +33,7 @@ export class CreateEventDto {
 
   @IsEnum(EventCategory)
   category: EventCategory;
+
+  @IsNumber()
+  price: number;
 }
