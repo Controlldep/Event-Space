@@ -9,6 +9,10 @@ scrape_configs:
     static_configs:
         - targets: [ 'events:3000' ]
 
+  - job_name: 'payments-service'
+    static_configs:
+      - targets: [ 'payments:3002' ]
+
   - job_name: 'auth-service'
     static_configs:
         - targets: [ 'auth:3001' ]
