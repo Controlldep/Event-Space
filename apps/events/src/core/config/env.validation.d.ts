@@ -10,12 +10,11 @@ export declare const envSchema: z.ZodObject<{
     EVENTS_DB_HOST: z.ZodDefault<z.ZodString>;
     EVENTS_DB_PASSWORD: z.ZodString;
     EVENTS_DB_NAME: z.ZodString;
-    JWT_SECRET: z.ZodString;
-    MAX_AGE_ACCESS_TOKEN: z.ZodCoercedString<unknown>;
+
+    PAYMENTS_JWT_SECRET: z.ZodString;
+    PAYMENTS_MAX_AGE_ACCESS_TOKEN: z.ZodCoercedString<unknown>;
+
     MAX_AGE_ACCESS_TOKEN_FOR_REDIS: z.ZodCoercedNumber<unknown>;
-    JWT_SECRET_REFRESH: z.ZodString;
-    MAX_AGE_REFRESH_TOKEN: z.ZodCoercedString<unknown>;
-    MAX_AGE_REFRESH_TOKEN_FOR_REDIS: z.ZodCoercedNumber<unknown>;
     REDIS_HOST: z.ZodDefault<z.ZodString>;
     REDIS_PORT: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
     REDIS_PASSWORD: z.ZodOptional<z.ZodString>;
