@@ -67,7 +67,7 @@ services:
       dockerfile: ./apps/payments/Dockerfile
     container_name: event_api_container
     ports:
-      - "3002:3002"
+      - "${PAYMENTS_TCP_PORT}:${PAYMENTS_TCP_PORT}"
     env_file:
       - env/.env.development
     networks:
