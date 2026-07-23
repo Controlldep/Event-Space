@@ -14,6 +14,7 @@ import { type ActiveUserData, CurrentUser } from '@app/decorators/extract-user-f
 import { PurchaseTicketCommand } from '../../tickets/application/use-case/command/purchase-ticket-use-case';
 import { JwtAuthGuard } from '@app/guards';
 
+@UseGuards(JwtAuthGuard)
 @Controller('events')
 export class EventsController {
   constructor(
@@ -22,37 +23,31 @@ export class EventsController {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async getAllEvents(@Query() dto: QueryEventDto) {
     return await this.queryBus.execute(new GetAllEventsQuery(dto));
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getEventById(@Param('id') id: string): Promise<EventEntity | null> {
     return await this.queryBus.execute(new GetEventByIdQuery(id));
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   async createEvent(@CurrentUser() user: ActiveUserData, @Body() dto: CreateEventDto): Promise<EventEntity> {
     return await this.commandBus.execute(new CreateEventCommand(user, dto));
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async patchEvent(@CurrentUser() user: ActiveUserData, @Param('id') id: string, @Body() dto: UpdateEventDto): Promise<EventEntity> {
     return await this.commandBus.execute(new UpdateEventCommand(id, dto, user));
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteEvent(@Param('id') id: string): Promise<DeleteResult> {
     return await this.eventsService.deleteEvent(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('purchase/:eventId')
   async purchaseTicket(@CurrentUser() user: ActiveUserData, @Param('eventId') eventId: string): Promise<{ redirectUrl: string }> {
     return await this.commandBus.execute(new PurchaseTicketCommand(user, eventId));
