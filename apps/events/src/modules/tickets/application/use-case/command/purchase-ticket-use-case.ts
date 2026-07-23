@@ -4,9 +4,10 @@ import { ActiveUserData } from '@app/decorators/extract-user-from-request';
 import { EventEntity } from '../../../../events/domain/event.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
-import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { LoggerService } from '@app/logger';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 
 export class PurchaseTicketCommand {
   constructor(
@@ -19,7 +20,7 @@ export class PurchaseTicketCommand {
 export class PurchaseTicketUseCase implements ICommandHandler<PurchaseTicketCommand> {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly httpService: HttpService,
+    @Inject('PAYMENTS_SERVICE') private readonly paymentsClient: ClientProxy,
     private readonly logger: LoggerService,
   ) {
     this.logger.setContext(PurchaseTicketUseCase.name);
@@ -68,16 +69,20 @@ export class PurchaseTicketUseCase implements ICommandHandler<PurchaseTicketComm
 
       try {
         const paymentResponse = await firstValueFrom(
-          this.httpService.post('http://payments:3002/create-checkout-session', {
+          this.paymentsClient.send('payments.create-checkout-session', {
             userId: user.userId,
             eventId: eventId,
-            amount: findEvent.price,
+            price: findEvent.price,
+            eventTitle: findEvent.title,
           }),
         );
         return { redirectUrl: paymentResponse.data.redirectUrl };
       } catch (err) {
         this.logger.error(err);
         await queryRunner.manager.delete(TicketEntity, { id: ticket.id });
+
+        findEvent.currentParticipantsCount--;
+        await queryRunner.manager.save(findEvent);
 
         throw new CustomHttpException(DomainExceptionCode.INTERNAL_SERVER_ERROR, 'Платежный сервис недоступен');
       }

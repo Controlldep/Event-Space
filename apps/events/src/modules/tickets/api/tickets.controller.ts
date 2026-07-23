@@ -6,12 +6,14 @@ import { BaseQueryParams } from '../../../core/dto/base.query.params';
 import { GetMyTicketsQuery } from '../application/query/get-my-tickets-use-case';
 import { DeleteTicketCommand } from '../application/use-case/command/delete-ticket-use-case';
 import { JwtAuthGuard } from '@app/guards';
+import { TicketsService } from '../application/tickets.service';
 
 @Controller('tickets')
 export class TicketsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly ticketsService: TicketsService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -21,8 +23,14 @@ export class TicketsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @Delete(':id/refund')
   async deleteTicket(@CurrentUser() user: ActiveUserData, @Param('id') id: string): Promise<boolean> {
     return await this.commandBus.execute(new DeleteTicketCommand(user, id));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('history')
+  async getHistory(@CurrentUser() user: ActiveUserData) {
+    return this.ticketsService.getPaymentHistory(user.userId);
   }
 }
