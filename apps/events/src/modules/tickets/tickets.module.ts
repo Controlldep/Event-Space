@@ -11,10 +11,31 @@ import { GetMyTicketsUseCase } from './application/query/get-my-tickets-use-case
 import { USER_VERIFIER } from '@app/guards/user-verifier.token';
 import { HttpUserVerifier } from './application/http-user-verifier.service';
 import { HttpModule } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { StripeWebhookController } from './api/stripe-webhook.internal.controller';
+import { CleanReservedTicketsCron } from './application/jobs/clean-reserved-tickets.cron';
 
 @Module({
-  imports: [CqrsModule, HttpModule, TypeOrmModule.forFeature([TicketEntity])],
-  controllers: [TicketsController],
+  imports: [
+    CqrsModule,
+    HttpModule,
+    TypeOrmModule.forFeature([TicketEntity]),
+    ClientsModule.registerAsync([
+      {
+        name: 'PAYMENTS_SERVICE',
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: 'localhost',
+            port: configService.get('PAYMENTS_TCP_PORT'),
+          },
+        }),
+      },
+    ]),
+  ],
+  controllers: [TicketsController, StripeWebhookController],
   providers: [
     { provide: USER_VERIFIER, useClass: HttpUserVerifier },
     TicketsService,
@@ -22,6 +43,7 @@ import { HttpModule } from '@nestjs/axios';
     PurchaseTicketUseCase,
     DeleteTicketUseCase,
     GetMyTicketsUseCase,
+    CleanReservedTicketsCron,
   ],
   exports: [TicketsService],
 })
