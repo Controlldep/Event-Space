@@ -13,7 +13,7 @@ export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'stripe_payment_intent_id', type: 'varchar', unique: true })
+  @Column({ name: 'stripe_payment_intent_id', type: 'varchar' })
   stripePaymentIntentId: string;
 
   @Column({ type: 'int' })
@@ -42,7 +42,16 @@ export class Payment {
   updatedAt: Date;
 
   @Column({ name: 'paid_at', type: 'timestamp', nullable: true })
-  paidAt: Date;
+  paidAt: Date | null;
+
+  @Column({ name: 'event_id', type: 'uuid' })
+  eventId: string;
+
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
+
+  @Column({ name: 'customer_id', type: 'uuid' })
+  customerId: string;
 
   @ManyToOne(() => Customer, (customer) => customer.payments)
   @JoinColumn({ name: 'customer_id' })
