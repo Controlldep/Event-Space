@@ -44,6 +44,7 @@
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.218.0",
     "@opentelemetry/instrumentation-express": "^0.66.0",
     "@opentelemetry/sdk-node": "^0.218.0",
+    "@stripe/cli": "^1.43.8",
     "@types/cookie": "^1.0.0",
     "@types/ioredis": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.10",

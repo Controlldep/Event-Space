@@ -2185,6 +2185,42 @@
   resolved "https://registry.yarnpkg.com/@sqltools/formatter/-/formatter-1.2.5.tgz#3abc203c79b8c3e90fd6c156a0c62d5403520e12"
   integrity sha512-Uy0+khmZqUrUGm5dmMqVlnvufZRSK0FbYzVgp0UMstm+F5+W2/jnEEQyc9vo1ZR/E5ZI/B1WjjoTqBqwJL6Krw==
 
+"@stripe/cli-darwin-arm64@1.43.8":
+  version "1.43.8"
+  resolved "https://registry.yarnpkg.com/@stripe/cli-darwin-arm64/-/cli-darwin-arm64-1.43.8.tgz#e277dea62b3c6a90a1afd3f69731bc00b317ae81"
+  integrity sha512-RDl9h9e2JcFJu/flTxhnJa3AXlgnzUZVBfWZ1PaxWpJU8zReQJY+rVtaV2KYOaktgOsQFFbXRnqcxb0YFtc8rQ==
+
+"@stripe/cli-darwin-x64@1.43.8":
+  version "1.43.8"
+  resolved "https://registry.yarnpkg.com/@stripe/cli-darwin-x64/-/cli-darwin-x64-1.43.8.tgz#adad4c4aa1af71ed9b0f401b8bed7bd6628019b7"
+  integrity sha512-/LPn0hBkFJsWrgYitSeyLlvYSkJqFv0n3LDy1gV8g23EDVdR6Q2eRlp/kQoh1X9eEVYf7f/bgdOtLsU6CK4ZLw==
+
+"@stripe/cli-linux-arm64@1.43.8":
+  version "1.43.8"
+  resolved "https://registry.yarnpkg.com/@stripe/cli-linux-arm64/-/cli-linux-arm64-1.43.8.tgz#d8bc4433a1e3de2187a6d0e44277c06108a9f7ef"
+  integrity sha512-js12MEkpYp1iBwH/+WMKT7/DL8K2LFuwRBK4tu2BGJMSLWPwfHTWh9DjxXpLbaDYJTGkkZPdtZWZdXFYj5J5Lg==
+
+"@stripe/cli-linux-x64@1.43.8":
+  version "1.43.8"
+  resolved "https://registry.yarnpkg.com/@stripe/cli-linux-x64/-/cli-linux-x64-1.43.8.tgz#9f773090286dd8a7904ecffbd5a913c856a75472"
+  integrity sha512-uQwrO9fbUoy2Hryfu9tVrgP/tzP1Ox14LJ469WP0kirq67EATawC7j0F/smXrdYFZgTDvM9IR0LUm72CVdHRjA==
+
+"@stripe/cli-win32-x64@1.43.8":
+  version "1.43.8"
+  resolved "https://registry.yarnpkg.com/@stripe/cli-win32-x64/-/cli-win32-x64-1.43.8.tgz#8ca88d4ddd3dea80eee2dc963f0b9dc2bdef3aa9"
+  integrity sha512-pRPclUrjpCvC2253EhzVkUVUqzKHMhd0Lb6QIdmv3W8DY5mSf2i5CIuLPdkgIFbdhIG1eVoZowiHQAihQXGG0Q==
+
+"@stripe/cli@^1.43.8":
+  version "1.43.8"
+  resolved "https://registry.yarnpkg.com/@stripe/cli/-/cli-1.43.8.tgz#a14d978f1383cdd66aa0f4ee7047e558b7c9c0d2"
+  integrity sha512-Mo4kJgkd30FcHl5ub4btPFc3TGCDbziKHUOfh9xvSM7SFbB/sh+H6J24536c5hwoYB5PUufern1h8YaGRvbz+A==
+  optionalDependencies:
+    "@stripe/cli-darwin-arm64" "1.43.8"
+    "@stripe/cli-darwin-x64" "1.43.8"
+    "@stripe/cli-linux-arm64" "1.43.8"
+    "@stripe/cli-linux-x64" "1.43.8"
+    "@stripe/cli-win32-x64" "1.43.8"
+
 "@swc/core-darwin-arm64@1.15.18":
   version "1.15.18"
   resolved "https://registry.yarnpkg.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.15.18.tgz#fb487392f7bbe3179166b9b0d128916e39a627af"
