@@ -9,7 +9,7 @@ import { envSchema } from './core/config/env.validation';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule, RequestContextMiddleware } from '@app/logger';
 import { MetricsModule } from '../../../libs/metrics/src/module';
-import { RedisModule } from '@app/redis/redis.module';
+import { RedisModule } from '@app/redis';
 
 @Module({
   imports: [

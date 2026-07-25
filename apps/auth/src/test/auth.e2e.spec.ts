@@ -1,18 +1,17 @@
 import { ValidationPipe } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { cleanDatabase } from '../../helpers/db-cleaner';
+import { cleanDatabase } from '../../../../test/helpers/db-cleaner';
 import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { randomUUID } from 'crypto';
-import { AppModule } from '../../../apps/events/src/app.module';
-import { CustomHttpException, DomainExceptionCode } from '../../../libs/exceptions/src/domain.exceptions';
-import { CustomExceptionFilter } from '../../../libs/exceptions/src/exceptionts-filter';
-import { LoggingInterceptor } from '../../../apps/events/src/core/interceptors/logging.interceptor';
-import { UserRole } from '../../../apps/events/src/modules/users/domain/enum/user-role.type';
-import { UserEntity } from '../../../apps/events/src/modules/users/domain/user.entity';
-import { SessionEntity } from '../../../apps/events/src/modules/users/domain/session.entity';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
+import { CustomExceptionFilter } from '@app/exceptions/exceptionts-filter';
+import { UserRole } from '../domain/enum/user-role.type';
+import { UserEntity } from '../domain/user.entity';
+import { SessionEntity } from '../domain/session.entity';
+import { AppModule } from '../app.module';
 
 describe('Auth (e2e)', () => {
   let app: NestExpressApplication;
@@ -37,11 +36,10 @@ describe('Auth (e2e)', () => {
       }),
     );
     app.useGlobalFilters(new CustomExceptionFilter());
-    app.useGlobalInterceptors(new LoggingInterceptor());
 
     await app.init();
     dataSource = app.get(DataSource);
-    await dataSource.query('TRUNCATE TABLE "tickets", "events", "session", "users" RESTART IDENTITY CASCADE');
+    await dataSource.query('TRUNCATE TABLE "session", "users" RESTART IDENTITY CASCADE');
   });
 
   beforeEach(async () => {

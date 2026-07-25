@@ -31,9 +31,11 @@ import { USER_VERIFIER } from '@app/guards/user-verifier.token';
 import { JwtStrategy } from '@app/guards/strategy/jwt.strategy';
 import { JwtAuthGuard } from '@app/guards/jwt-auth.guard';
 import { InternalAuthController } from './api/internal-auth.controller';
+import { RedisModule } from '@app/redis';
 
 @Module({
   imports: [
+    RedisModule,
     CqrsModule,
     TypeOrmModule.forFeature([UserEntity, SessionEntity]),
     PassportModule,

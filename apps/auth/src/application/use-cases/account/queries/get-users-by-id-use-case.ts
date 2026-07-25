@@ -2,7 +2,7 @@ import { UserEntity } from '../../../../domain/user.entity';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { UsersQueryRepository } from '../../../../infrastructure/users-query.repository';
 import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
-import { RedisService } from '@app/redis/redis.service';
+import { RedisService } from '@app/redis';
 
 export class GetUsersByIdQuery {
   constructor(public readonly id: string) {}

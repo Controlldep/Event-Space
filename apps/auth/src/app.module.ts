@@ -5,10 +5,9 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule, RequestContextMiddleware } from '@app/logger';
 import { MetricsModule } from '../../../libs/metrics/src/module';
-import { RedisModule } from '@app/redis/redis.module';
 import { UsersModule } from './users.module';
-import { envSchema } from '../../events/src/core/config/env.validation';
 import databaseConfig from './core/config/database.config';
+import { envSchema } from './core/config/env.validation';
 
 @Module({
   imports: [
@@ -34,7 +33,6 @@ import databaseConfig from './core/config/database.config';
       useFactory: (configService: ConfigService) => configService.get<TypeOrmModuleOptions>('database')!,
     }),
     UsersModule,
-    RedisModule,
   ],
   controllers: [],
   providers: [],
