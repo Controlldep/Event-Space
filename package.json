@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "dotenv -e env/.env.development -- jest --config ./test/jest-e2e.json",
+    "test:auth:e2e": "cross-env NODE_ENV=test jest --config apps/auth/src/test/jest.e2e.json --runInBand",
     "typeorm": "typeorm -d src/data-source.ts",
     "migration:run": "ts-node-esm -P tsconfig.json -r tsconfig-paths/register node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
     "migration:gen": "ts-node-esm -P tsconfig.json -r tsconfig-paths/register node_modules/typeorm/cli.js migration:generate -d src/data-source.ts"
@@ -91,6 +91,7 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.55.0",
     "@typescript-eslint/parser": "^8.55.0",
+    "cross-env": "^10.1.0",
     "dotenv-cli": "^11.0.0",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
@@ -100,12 +101,44 @@
     "prettier": "^3.8.1",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
-    "ts-jest": "^29.2.5",
+    "ts-jest": "^29.4.12",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.20.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?![@autofiy/autofiyable|@autofiy/property]).+\\.js$",
+      "/node_modules/(?![@autofiy/autofiyable|@autofiy/property]).+\\.ts$"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/decorators(|/.*)$": "<rootDir>/libs/decorators/src/$1",
+      "^@app/exceptions(|/.*)$": "<rootDir>/libs/exceptions/src/$1",
+      "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1",
+      "^@app/redis(|/.*)$": "<rootDir>/libs/redis/src/$1",
+      "^@app/guards(|/.*)$": "<rootDir>/libs/guards/src/$1"
+    }
   }
 }

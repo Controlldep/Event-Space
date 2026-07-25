@@ -74,7 +74,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       }
     } else {
       const maxAge: string = this.configService.get<string>('MAX_AGE_REFRESH_TOKEN')!;
-      const updateDto: UpdateSessionDto = UpdateUserSession(ip, userAgent, refreshTokenHash, maxAge);
+      const updateDto: UpdateSessionDto = UpdateUserSession(ip, userAgent, maxAge);
       await this.sessionService.updateSession(user.id, deviceId!, updateDto);
     }
 
