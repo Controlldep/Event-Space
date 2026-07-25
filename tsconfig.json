@@ -36,5 +36,4 @@
       "@app/guards/*": ["libs/guards/src/*"]
     }
   },
-  "include": ["libs/**/*", "apps/**/*", "test"]
 }

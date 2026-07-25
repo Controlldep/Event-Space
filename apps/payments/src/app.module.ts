@@ -15,11 +15,16 @@ import { StripeWebhookUseCase } from './application/use-case/command/stripe-webh
 import { GetPaymentHistoryHandler } from './application/use-case/query/get-payment-history';
 import { RefundPaymentUseCase } from './application/use-case/command/refund-payment.use-case';
 import { StripeService } from './application/stripe.service';
+import { PaymentsRepository } from './infrastructure/payments.repository';
+import { Customer } from './domain/stripe-customer.entity';
+import { Payment } from './domain/payment.entity';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
     LoggerModule,
     PassportModule,
+    CqrsModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -34,6 +39,7 @@ import { StripeService } from './application/stripe.service';
         return parsed.data;
       },
     }),
+    TypeOrmModule.forFeature([Customer, Payment]),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -44,6 +50,7 @@ import { StripeService } from './application/stripe.service';
   providers: [
     PaymentsJwtStrategy,
     PaymentsJwtGuard,
+    PaymentsRepository,
     CreateCheckoutSessionUseCase,
     StripeWebhookUseCase,
     GetPaymentHistoryHandler,
