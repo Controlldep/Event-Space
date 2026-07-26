@@ -3,14 +3,14 @@ import { DataSource } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
-import { cleanDatabase } from '../../helpers/db-cleaner';
+import { cleanDatabase } from '../../../../test/helpers/db-cleaner';
 import request from 'supertest';
 import { randomUUID } from 'crypto';
-import { AppModule } from '../../../apps/events/src/app.module';
-import { CustomHttpException, DomainExceptionCode } from '../../../libs/exceptions/src/domain.exceptions';
-import { CustomExceptionFilter } from '../../../libs/exceptions/src/exceptionts-filter';
-import { LoggingInterceptor } from '../../../apps/events/src/core/interceptors/logging.interceptor';
-import { EventEntity } from '../../../apps/events/src/modules/events/domain/event.entity';
+import { AppModule } from '../app.module';
+import { CustomHttpException, DomainExceptionCode } from '@app/exceptions/domain.exceptions';
+import { CustomExceptionFilter } from '@app/exceptions/exceptionts-filter';
+import { LoggingInterceptor } from '../core/interceptors/logging.interceptor';
+import { EventEntity } from '../modules/events/domain/event.entity';
 
 describe('Events (e2e)', () => {
   let app: NestExpressApplication;
