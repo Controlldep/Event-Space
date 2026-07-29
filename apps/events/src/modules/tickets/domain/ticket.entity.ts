@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { EventEntity } from '../../events/domain/event.entity';
 import { CreateTicketDto } from './input-dto/create-ticket.dto';
 
@@ -12,9 +12,11 @@ export class TicketEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column('uuid')
   userId: string;
 
+  @Index()
   @Column('uuid')
   eventId: string;
 
@@ -24,6 +26,7 @@ export class TicketEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Index()
   @Column({ type: 'enum', enum: TicketStatus, default: TicketStatus.RESERVED })
   status: TicketStatus;
 

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Customer } from './stripe-customer.entity';
 
 export enum PaymentStatus {
@@ -13,6 +13,7 @@ export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column({ name: 'stripe_payment_intent_id', type: 'varchar' })
   stripePaymentIntentId: string;
 
@@ -22,6 +23,7 @@ export class Payment {
   @Column({ type: 'varchar', length: 3 })
   currency: string;
 
+  @Index()
   @Column({
     type: 'enum',
     enum: PaymentStatus,
@@ -44,9 +46,11 @@ export class Payment {
   @Column({ name: 'paid_at', type: 'timestamp', nullable: true })
   paidAt: Date | null;
 
+  @Index()
   @Column({ name: 'event_id', type: 'uuid' })
   eventId: string;
 
+  @Index()
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
 import type { UserEntity } from './user.entity';
 import { SessionInputDto } from './input-dto/session.input.dto';
 
@@ -23,6 +23,7 @@ export class SessionEntity {
   @Column({ type: 'timestamp' })
   lastActiveDate: Date;
 
+  @Index()
   @Column({ type: 'timestamp' })
   expirationDate: Date;
 

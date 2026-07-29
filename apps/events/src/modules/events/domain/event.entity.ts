@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { TicketEntity } from '../../tickets/domain/ticket.entity';
 import { CreateEventDto } from '../api/input-dto/create-event.dto';
 import { EventCategory } from './enum/event-category';
@@ -8,6 +8,7 @@ export class EventEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column()
   title: string;
 
@@ -20,6 +21,7 @@ export class EventEntity {
   @Column({ default: 0 })
   currentParticipantsCount: number;
 
+  @Index()
   @Column({ type: 'timestamptz' })
   startTime: Date;
 
@@ -29,12 +31,14 @@ export class EventEntity {
   @Column()
   location: string;
 
+  @Index()
   @Column({
     type: 'enum',
     enum: EventCategory,
   })
   category: EventCategory;
 
+  @Index()
   @Column('uuid')
   organizerId: string;
 

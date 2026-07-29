@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { UserRole } from './enum/user-role.type';
 import type { SessionEntity } from './session.entity';
 import { CreateUserDomainModel } from './input-dto/user-domain.model';
@@ -17,6 +17,7 @@ export class UserEntity {
   @Column()
   passwordHash: string;
 
+  @Index()
   @Column({
     type: 'enum',
     enum: UserRole,
