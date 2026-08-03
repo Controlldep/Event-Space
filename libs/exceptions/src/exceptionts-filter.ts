@@ -41,6 +41,8 @@ export class CustomExceptionFilter implements ExceptionFilter {
         return HttpStatus.NOT_FOUND;
       case DomainExceptionCode.UNAUTHORIZED:
         return HttpStatus.UNAUTHORIZED;
+      case DomainExceptionCode.SERVICE_UNAVAILABLE:
+        return HttpStatus.SERVICE_UNAVAILABLE;
       case DomainExceptionCode.INTERNAL_SERVER_ERROR:
         return HttpStatus.INTERNAL_SERVER_ERROR;
       case DomainExceptionCode.TOO_MANY_REQUESTS:
